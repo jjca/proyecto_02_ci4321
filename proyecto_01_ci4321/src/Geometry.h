@@ -27,7 +27,7 @@ class Sphere : public Geometry
 public:
 	unsigned int IBO;
 
-	std::vector<int> indices;
+	std::vector<unsigned int> indices;
 	float radius;
 	int sectorCount;
 	int stackCount;
@@ -45,6 +45,7 @@ public:
 
 	float width;
 	float height;
+	float depth;
 
 	Cube(float width = 1.0, float height = 1.0, float depth = 1.0, glm::vec3 position = glm::vec3(0.0,0.0,0.0));
 

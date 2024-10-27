@@ -11,6 +11,7 @@
 #include <filesystem>
 
 #include "Geometry.h"
+#include "Tank.h"
 
 using namespace std;
 
@@ -50,12 +51,7 @@ int main(void) {
 
 	Shader ourShader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
-	Sphere sphere(1.0,36,18,glm::vec3(1.0, 0.0, 0.0));
-	sphere.SetupGL();
-
-	Cube cube(1.0,1.0,1.0,glm::vec3(-1.0,0.0,0.0));
-	cube.SetupGL();
-
+	Tank tank;
 
 	///////////////////////
 	// ZONA DE TEXTURAS //
@@ -116,8 +112,8 @@ int main(void) {
 		unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 
-		sphere.Draw(ourShader);
-		cube.Draw(ourShader);
+		tank.Draw(ourShader);
+		glBindVertexArray(0);
 
 		/* Intercambio entre buffers */
 		glfwSwapBuffers(window);
@@ -128,8 +124,7 @@ int main(void) {
 	}
 
 	// Borramos el contenido de los buffers
-	sphere.CleanGL();
-	cube.CleanGL();
+	tank.Clear();
 
 	/* Cierre de glfw */
 	glfwTerminate();

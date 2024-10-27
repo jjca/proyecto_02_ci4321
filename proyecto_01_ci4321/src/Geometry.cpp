@@ -122,8 +122,10 @@ void Sphere::Draw(const Shader& ourShader)
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
     glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
-    glDrawElements(GL_TRIANGLES,(unsigned int)indices.size(),GL_UNSIGNED_INT, (void*)0);
+    glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, (void*)0);
+
 }
 
 void Sphere::SetupGL()
@@ -139,7 +141,7 @@ void Sphere::SetupGL()
     // Datos de indices
     glGenBuffers(1, &IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);   
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (unsigned int)indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (unsigned int)indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -149,18 +151,25 @@ void Sphere::SetupGL()
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(sizeof(float) * 3));
     glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(sizeof(float) * 6));
+
+    // Unbind de los buffers para limpiar futuras figuras
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Sphere::CleanGL()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &IBO);
 }
 
 Cube::Cube(float width, float height, float depth, glm::vec3 position)
 {
     this->width = width;
     this->height = height;
+    this->depth = depth;
     this->position = position;
 
     // Inicializacion del cambio de las caras con respecto al cubo unitario
@@ -271,6 +280,10 @@ void Cube::SetupGL()
     // Atributos de coordenadas de texturas
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // Unbind de los buffers para limpiar futuras figuras
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Cube::CleanGL()

@@ -136,13 +136,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Geometry.cpp" />
-    <ClCompile Include="src\Prueba.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Shader.h" />
     <ClCompile Include="src\stb_image\stb_image.cpp" />
+    <ClCompile Include="src\Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Geometry.h" />
     <ClInclude Include="src\stb_image\stb_image.h" />
+    <ClInclude Include="src\Tank.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Shaders\FragmentShader.fs" />

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Prueba.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\stb_image\stb_image.cpp">
@@ -27,12 +27,18 @@
     <ClCompile Include="src\Geometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Tank.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\stb_image\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Tank.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
