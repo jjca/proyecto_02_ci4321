@@ -54,5 +54,25 @@ public:
 	void Draw(const Shader& ourShader) override;
 };
 
+class Cylinder : public Geometry
+{
+public:
+	unsigned int IBO;
+
+	std::vector<float> unitCircleVertices;
+	std::vector<unsigned int> indices;
+	
+	float radius;
+	float height;
+	float sectorCount;
+	
+
+	Cylinder(float radius = 1.0, float height = 1.0, int sectorCount = 36, glm::vec3 position = glm::vec3(0.0, 0.0, 0.0));
+
+	void SetupGL() override;
+	void CleanGL() override;
+	void Draw(const Shader& ourShader) override;
+};
+
 
 #endif

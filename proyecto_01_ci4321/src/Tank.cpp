@@ -6,8 +6,10 @@ Tank::Tank()
 	body.SetupGL();
 	
 	glm::vec3 topPos = body.position + glm::vec3(0.0, 1, 0.0);
-	top = Sphere(3, 36, 18, topPos);
-
+	top = Sphere(1.5f, 36, 18, topPos);
+	top.SetupGL();
+	canon = Cylinder(0.5f, 3.0f, 64, top.position + glm::vec3(0.0, 0.75, 1.5));
+	canon.SetupGL();
 	for (int i = 0; i < 4; i++) {
 
 		glm::vec3 wheelPos = body.position;
@@ -28,23 +30,25 @@ Tank::Tank()
 			break;
 		}
 
-		wheels[i] = Sphere(0.1, 36, 18, wheelPos);
+		wheels[i] = Sphere(0.5, 36, 18, wheelPos);
 		wheels[i].SetupGL();
 	}
 }
 
 void Tank::Draw(const Shader& ourShader)
 {
+	canon.Draw(ourShader);
 	body.Draw(ourShader);
 	top.Draw(ourShader);
 
-	//for (int i = 0; i < 4; i++) {
-	//	wheels[i].Draw(ourShader);
-	//}
+	for (int i = 0; i < 4; i++) {
+		wheels[i].Draw(ourShader);
+	}
 }
 
 void Tank::Clear()
 {
+	canon.CleanGL();
 	body.CleanGL();
 	top.CleanGL();
 

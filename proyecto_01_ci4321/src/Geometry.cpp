@@ -291,3 +291,204 @@ void Cube::CleanGL()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
+
+
+Cylinder::Cylinder(float radius, float height, int sectorCount, glm::vec3 position) {
+    // Crea un circulo en el plano XY
+    this->radius = radius;
+    this->height = height;
+    this->sectorCount = sectorCount;
+    this->position = position;
+        
+    // Variables para generar las cosas
+    float sectorStep = 2 * PI / sectorCount;
+    float sectorAngle; // Angulo en Radianes
+
+    for (int i = 0; i <= sectorCount; ++i) {
+        sectorAngle = i * sectorStep;
+        unitCircleVertices.push_back(cos(sectorAngle)); // x
+        unitCircleVertices.push_back(sin(sectorAngle)); // y 
+        unitCircleVertices.push_back(0);                // z
+    }
+    
+    std::vector<float> unitVertices = unitCircleVertices;
+
+    attributes.clear();
+
+    for (int i = 0; i < 2; ++i) {
+        float h = -height / 2.0f + i * height;
+        float t = 1.0f - i;
+        for (int j = 0, k = 0; j <= sectorCount; ++j, k += 3) {
+            float ux = unitVertices[k];
+            float uy = unitVertices[k + 1];
+            float uz = unitVertices[k + 2];
+            // Vectores de posicion
+            // se añaden a la lista de vertices
+            attributes.push_back(ux * radius);
+            attributes.push_back(uy * radius);
+            attributes.push_back(h);
+
+            // Se añaden los vectores normales
+            attributes.push_back(ux);
+            attributes.push_back(uy);
+            attributes.push_back(uz);
+                
+            // Coord de la textura;
+
+            // Calculos de las coordenadas de los vertices en la textura, dentro del rango [0, 1]
+            float s = (float)j / sectorCount;
+
+            attributes.push_back(s);
+            attributes.push_back(t);
+        }
+    }
+    
+    int baseCenterIndex = (int)attributes.size() / 3;
+    int topCenterIndex = baseCenterIndex + sectorCount + 1;
+
+    for ( int i = 0; i < 2; ++i) {
+        float h = -height / 2.0f + i * height;
+        float nz = -1 + i * 2;
+        // se ubica el punto central del cilindro
+        
+        attributes.push_back(0);
+        attributes.push_back(0);
+        attributes.push_back(h);
+        attributes.push_back(0);
+        attributes.push_back(0);
+        attributes.push_back(nz);
+        attributes.push_back(0.5f);
+        attributes.push_back(0.5f);
+        
+        for ( int j = 0, k = 0; j < sectorCount; ++j, k += 3) {
+            float ux = unitVertices[k];
+            float uy = unitVertices[k + 1];
+
+            attributes.push_back(ux * radius);
+            attributes.push_back(uy * radius);
+            attributes.push_back(h);
+
+            attributes.push_back(0);
+            attributes.push_back(0);
+            attributes.push_back(nz);
+            
+
+            attributes.push_back(-ux * 0.5f + 0.5f);
+            attributes.push_back(-uy * 0.5f + 0.5f);
+        }
+    }
+
+
+    int k1 = 0;
+    int k2 = sectorCount + 1;
+    indices.clear();
+
+    for (int i = 0; i < sectorCount; ++i, ++k1, ++k2) {
+        // Se dibujan dos triangulos por sector
+        indices.push_back(k1);
+        indices.push_back(k1 + 1);
+        indices.push_back(k2);
+
+        indices.push_back(k2);
+        indices.push_back(k1 + 1);
+        indices.push_back(k2 + 1);
+    }
+
+    // Indices para la superficie de abajo
+
+    int k = baseCenterIndex + 1;
+    for ( int i = 0; i < sectorCount; ++i) {
+        if (i < sectorCount - 1) {
+            indices.push_back(baseCenterIndex);
+            indices.push_back(k + 1);
+            indices.push_back(k);
+        }
+
+        else {
+            indices.push_back(baseCenterIndex);
+            indices.push_back(baseCenterIndex + 1);
+            indices.push_back(k);
+        }
+        ++k;
+    }
+    k = topCenterIndex + 1;
+    // indices para la parte de arriba
+    for (int i = 0; i < sectorCount; ++i)
+    {
+        if (i < sectorCount - 1)
+        {
+            indices.push_back(topCenterIndex);
+            indices.push_back(k);
+            indices.push_back(k + 1);
+        }
+        else // last triangle
+        {
+            indices.push_back(topCenterIndex);
+            indices.push_back(k);
+            indices.push_back(topCenterIndex + 1);
+        }
+        ++k;
+    }
+}
+
+void Cylinder::SetupGL() {
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER,
+        (unsigned int)attributes.size() * sizeof(float),
+        attributes.data(),
+        GL_STATIC_DRAW);
+
+    // Datos de indices
+    glGenBuffers(1, &IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+        (unsigned int)indices.size() * sizeof(unsigned int), 
+        indices.data(), 
+        GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    // Setear los atributos en el orden indicado (posicion, normales, coord Text) 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6));
+
+    // Unbind de los buffers para limpiar futuras figuras
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Cylinder::CleanGL()
+{
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &IBO);
+}
+
+void Cylinder::Draw(const Shader& ourShader)
+{
+    // Creacion de transformaciones
+    glm::mat4 model = glm::mat4(1.0f);
+
+    model = glm::translate(model, position);
+
+    // Recuperacion de las ubicaciones de los uniforms
+    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+
+    // Pase de ubicaciones a los shaders
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+}

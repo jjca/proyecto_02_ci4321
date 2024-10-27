@@ -15,7 +15,7 @@ public:
 private:
 	Cube body;
 	Sphere top;
-	// Cylinder canon;
+	Cylinder canon;
 	Sphere wheels[4];
 
 };
