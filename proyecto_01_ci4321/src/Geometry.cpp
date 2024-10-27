@@ -1,4 +1,9 @@
 #include "Geometry.h"
+#include <GLFW/glfw3.h>
+#include <GL/glew.h>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 
 Sphere::Sphere(float radius, int sectorCount, int stackCount)
 {
@@ -44,30 +49,112 @@ Sphere::Sphere(float radius, int sectorCount, int stackCount)
             // Componente Y -> r * cos(u) * sin(v)
             y = xy * sinf(sectorAngle);  
 
-            // Agregamso los vertices a la lista
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(z);
+            // Agregamos los vertices a la lista
+            attributes.push_back(x);
+            attributes.push_back(y);
+            attributes.push_back(z);
 
             // Agregando normales (nx, ny, nz)
             nx = x * lengthInv;
             ny = y * lengthInv;
             nz = z * lengthInv;
 
-            normals.push_back(nx);
-            normals.push_back(ny);
-            normals.push_back(nz);
+            attributes.push_back(nx);
+            attributes.push_back(ny);
+            attributes.push_back(nz);
 
             // Calculos de las coordenadas de los vertices en la textura, dentro del rango [0, 1]
             s = (float)j / sectorCount;
             t = (float)i / stackCount;
 
-            texCoords.push_back(s);
-            texCoords.push_back(t);
+            attributes.push_back(s);
+            attributes.push_back(t);
+        }
+    }
+
+    int k1, k2;
+    for (int i = 0; i < stackCount; ++i)
+    {
+        // Inicializacion de la esfera por sectores. Se usara el termino "aro" como analogia, al referirse a cada nivel de la esfera
+        // Comienzo desde el "aro" actual
+        k1 = i * (sectorCount + 1);     
+
+        // Comienzo desde el "aro" actual
+        k2 = k1 + sectorCount + 1;      
+
+        for (int j = 0; j < sectorCount; ++j)
+        {
+            // Hay 2 triangulos por sector, excluyendo el aro superior y el inferior
+            // k1 => k2 => k1+1
+            if (i != 0)
+            {
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back(k1 + 1);
+            }
+
+            // k1+1 => k2 => k2+1
+            if (i != (stackCount - 1))
+            {
+                indices.push_back(k1 + 1);
+                indices.push_back(k2);
+                indices.push_back(k2 + 1);
+            }
+
+            ++k1;
+            ++k2;
         }
     }
 }
 
+void Sphere::Draw(const Shader& ourShader)
+{
+    // Creacion de transformaciones
+    glm::mat4 model = glm::mat4(1.0f);
+    
+    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+    
+    // Recuperacion de las ubicaciones de los uniforms
+    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+   
+    // Pase de ubicaciones a los shaders
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    glBindVertexArray(VAO);
+
+    glDrawElements(GL_TRIANGLES,(unsigned int)indices.size(),GL_UNSIGNED_INT, (void*)0);
+}
+
+void Sphere::SetupGL()
+{
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    //Datos de vertices
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);           
+    glBufferData(GL_ARRAY_BUFFER, (unsigned int)attributes.size() * sizeof(float), attributes.data(), GL_STATIC_DRAW);
+    
+    // Datos de indices
+    glGenBuffers(1, &IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);   
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (unsigned int)indices.size() * sizeof(int), indices.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    // Setear los atributos en el orden indicado (posicion, normales, coord Text) 
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(2, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(sizeof(float) * 6));
+}
+
+void Sphere::CleanGL()
+{
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+}
 
 Cube::Cube(float width, float height, float depth)
 {
@@ -79,130 +166,113 @@ Cube::Cube(float width, float height, float depth)
     float h = height/2;
     float d = depth/2;
 
-    //Posicion de los vertices
-    vertices = {
-            // Cara trasera
-            // Triangulo inferior
-            -w, -h, -d,
-            w, -h, -d,
-            w,  h, -d,
-            // Triangulo superior
-            w,  h, -d,
-            -w,  h, -d,
-            -w, -h, -d, 
-
-            // Cara frontal
-            // Triangulo inferior
-            -w, -h,  d,  
-            w, -h,  d,  
-            w,  h,  d, 
-            // Triangulo superior
-            w,  h,  d,  
-            -w,  h,  d,  
-            -w, -h,  d,
-
-            // Cara lateral izquierda
-            // Triangulo superior
-            -w,  h,  d,
-            -w,  h, -d,
-            -w, -h, -d,
-            // Triangulo inferior
-            -w, -h, -d,
-            -w, -h,  d,
-            -w,  h,  d,
-
-            // Cara lateral derecha
-            // Triangulo superior
-            w,  h,  d,
-            w,  h, -d,
-            w, -h, -d,
-            // Triangulo inferior
-            w, -h, -d,
-            w, -h,  d,
-            w,  h,  d,
-
-            // Cara inferior
-            // Triangulo superior
-            -w, -h, -d,
-            w, -h, -d,
-            w, -h,  d,
-            // Triangulo inferior
-            w, -h,  d,
-            -w, -h,  d,
-            -w, -h, -d,
-
-            // Cara superior
-            // Triangulo superior
-            -w,  h, -d,
-            w,  h, -d,
-            w,  h,  d,
-            // Triangulo inferior
-            w,  h,  d,
-            -w,  h,  d,
-            -w,  h, -d,
-    };
-     //Posicion de las coordenadas de la textura
-    texCoords = {
-
+    // Lista de atributos del cubo (Posicion / Tex Coords)
+    attributes = {
         // Cara trasera
         // Triangulo inferior
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        // Triangulo superior
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
+        -w, -h, -d,  0.0f, 0.0f,
+         w, -h, -d,  1.0f, 0.0f,
+         w,  h, -d,  1.0f, 1.0f,
+        //Triangulo superior
+         w,  h, -d,  1.0f, 1.0f,
+        -w,  h, -d,  0.0f, 1.0f,
+        -w, -h, -d,  0.0f, 0.0f,
 
         // Cara frontal
         // Triangulo inferior
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        1.0f, 1.0f,
+        -w, -h,  d,  0.0f, 0.0f,
+         w, -h,  d,  1.0f, 0.0f,
+         w,  h,  d,  1.0f, 1.0f,
         // Triangulo superior
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
+         w,  h,  d,  1.0f, 1.0f,
+        -w,  h,  d,  0.0f, 1.0f,
+        -w, -h,  d,  0.0f, 0.0f,
 
         // Cara lateral izquierda
         // Triangulo superior
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
+        -w,  h,  d,  1.0f, 0.0f,
+        -w,  h, -d,  1.0f, 1.0f,
+        -w, -h, -d,  0.0f, 1.0f,
         // Triangulo inferior
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
+        -w, -h, -d,  0.0f, 1.0f,
+        -w, -h,  d,  0.0f, 0.0f,
+        -w,  h,  d,  1.0f, 0.0f,
 
         // Cara lateral derecha
         // Triangulo superior
-        1.0f, 0.0f,
-        1.0f, 1.0f,
-        0.0f, 1.0f,
+         w,  h,  d,  1.0f, 0.0f,
+         w,  h, -d,  1.0f, 1.0f,
+         w, -h, -d,  0.0f, 1.0f,
         // Triangulo inferior
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f,
+         w, -h, -d,  0.0f, 1.0f,
+         w, -h,  d,  0.0f, 0.0f,
+         w,  h,  d,  1.0f, 0.0f,
 
         // Cara inferior
         // Triangulo superior
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        1.0f, 0.0f,
+        -w, -h, -d,  0.0f, 1.0f,
+         w, -h, -d,  1.0f, 1.0f,
+         w, -h,  d,  1.0f, 0.0f,
         // Triangulo inferior
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f,
+         w, -h,  d,  1.0f, 0.0f,
+        -w, -h,  d,  0.0f, 0.0f,
+        -w, -h, -d,  0.0f, 1.0f,
 
         // Cara superior
         // Triangulo superior
-        0.0f, 1.0f,
-        1.0f, 1.0f,
-        1.0f, 0.0f,
+        -w,  h, -d,  0.0f, 1.0f,
+         w,  h, -d,  1.0f, 1.0f,
+         w,  h,  d,  1.0f, 0.0f,
         // Triangulo inferior
-        1.0f, 0.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f
-
+         w,  h,  d,  1.0f, 0.0f,
+        -w,  h,  d,  0.0f, 0.0f,
+        -w,  h, -d,  0.0f, 1.0f
     };
+
+};
+
+void Cube::Draw(const Shader& ourShader)
+{
+    // Creacion de transformaciones
+    glm::mat4 model = glm::mat4(1.0f); 
+   
+    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+
+    // Recuperacion de las ubicaciones de los uniforms
+    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+
+    // Pase de ubicaciones a los shaders
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    glBindVertexArray(VAO);
+
+    // Dibujamos el cubo
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+}
+
+void Cube::SetupGL()
+{
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    // Iniciamos el proceso de binding/vinculacion
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, (unsigned int)attributes.size() * sizeof(float), attributes.data(), GL_STATIC_DRAW);
+
+    // Atributos de posicion
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Atributos de coordenadas de texturas
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void Cube::CleanGL()
+{
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
 }
