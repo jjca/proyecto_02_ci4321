@@ -5,11 +5,12 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-Sphere::Sphere(float radius, int sectorCount, int stackCount)
+Sphere::Sphere(float radius, int sectorCount, int stackCount, glm::vec3 position)
 {
     this->radius = radius;
     this->sectorCount = sectorCount;
     this->stackCount = stackCount;
+    this->position = position;
 
     // Inicializacion de variables a utilizar para calcular posicon, normales y coordenadas de la textura
     float x, y, z, xy;                    
@@ -112,7 +113,7 @@ void Sphere::Draw(const Shader& ourShader)
     // Creacion de transformaciones
     glm::mat4 model = glm::mat4(1.0f);
     
-    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+    model = glm::translate(model, position);
     
     // Recuperacion de las ubicaciones de los uniforms
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
@@ -156,10 +157,11 @@ void Sphere::CleanGL()
     glDeleteBuffers(1, &VBO);
 }
 
-Cube::Cube(float width, float height, float depth)
+Cube::Cube(float width, float height, float depth, glm::vec3 position)
 {
     this->width = width;
     this->height = height;
+    this->position = position;
 
     // Inicializacion del cambio de las caras con respecto al cubo unitario
     float w = width/2;
@@ -236,7 +238,7 @@ void Cube::Draw(const Shader& ourShader)
     // Creacion de transformaciones
     glm::mat4 model = glm::mat4(1.0f); 
    
-    model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+    model = glm::translate(model, position);
 
     // Recuperacion de las ubicaciones de los uniforms
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");

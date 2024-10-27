@@ -15,8 +15,8 @@
 using namespace std;
 
 /* Variables globales */
-//const int BGColor = 0x1b1e2b
-GLuint ibo_cube_elements;
+const int WIDTH = 1280;
+const int HEIGHT = 720;
 
 int main(void) {
 
@@ -28,7 +28,7 @@ int main(void) {
 	}
 
 	/* Creacion de ventana emergente y contexto */
-	window = glfwCreateWindow(640, 480, "Camionetica poderosa", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Camionetica poderosa", NULL, NULL);
 
 	if (!window) {
 		glfwTerminate();
@@ -50,8 +50,12 @@ int main(void) {
 
 	Shader ourShader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
-	Sphere sphere;
+	Sphere sphere(1.0,36,18,glm::vec3(1.0, 0.0, 0.0));
 	sphere.SetupGL();
+
+	Cube cube(1.0,1.0,1.0,glm::vec3(-1.0,0.0,0.0));
+	cube.SetupGL();
+
 
 	///////////////////////
 	// ZONA DE TEXTURAS //
@@ -59,7 +63,6 @@ int main(void) {
 
 	unsigned int texture1;
 	// Textura 1
-
 	glGenTextures(1, &texture1);
 
 	// Seteamos a la textura 1 como textura actual
@@ -89,7 +92,10 @@ int main(void) {
 	}
 	stbi_image_free(data);
 
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 0.1f, 100.0f);
+	ourShader.use(); 
+	ourShader.setInt("texture1", 0);
+
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 	ourShader.setMat4("projection", projection);
 
 	/* Ciclo hasta que el usuario cierre la ventana */
@@ -106,11 +112,12 @@ int main(void) {
 
 		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
 		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
 		unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 
 		sphere.Draw(ourShader);
+		cube.Draw(ourShader);
 
 		/* Intercambio entre buffers */
 		glfwSwapBuffers(window);
@@ -122,6 +129,7 @@ int main(void) {
 
 	// Borramos el contenido de los buffers
 	sphere.CleanGL();
+	cube.CleanGL();
 
 	/* Cierre de glfw */
 	glfwTerminate();
