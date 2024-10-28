@@ -271,7 +271,7 @@ void Tank::moveCanonUp(float deltaTime) {
 	}
 	else {
 		canon->rotation -= glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
-
+	}
 	cout << canon->rotation.x << " " << canon->rotation.y << " " << canon->rotation.z << " " << endl;
 }
 
@@ -281,7 +281,7 @@ void Tank::moveCanonDown(float deltaTime) {
 	}
 	else {
 		canon->rotation += glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
-	
+	}
 }
 
 void Tank::moveCanonRight(float deltaTime) {
@@ -293,6 +293,7 @@ void Tank::moveCanonRight(float deltaTime) {
 	else {
 		canon->rotation -= glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
 		rotateSphereRight(deltaTime);
+	}
 }
 
 void Tank::moveCanonLeft(float deltaTime) {

@@ -104,6 +104,39 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 		fov = 45.0f;
 }
 
+unsigned int loadSkybox(vector<std::string> faces)
+{
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+};
+
 int main(void) {
 
 	GLFWwindow* window;
@@ -156,6 +189,24 @@ int main(void) {
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 	shader.setMat4("projection", projection);
 
+	// Skybox area
+	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
+
+	unsigned int skyboxVAO;
+	glGenVertexArrays(1, &skyboxVAO);
+
+	vector<std::string> faces
+	{
+		"resources/textures/skybox.png",
+			"resources/textures/skybox.png",
+			"resources/textures/skybox.png",
+			"resources/textures/skybox.png",
+			"resources/textures/skybox.png",
+			"resources/textures/skybox.png"
+	};
+
+	unsigned int cubemapTexture = loadSkybox(faces);
+
 	/* Ciclo hasta que el usuario cierre la ventana */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -169,13 +220,15 @@ int main(void) {
 
 
 		/* Limpieza del buffer y el buffer de profundidad */
-		glClearColor(0.761f, 1.0f, 0.992f, 1.0f);
+		//glClearColor(0.761f, 1.0f, 0.992f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		glDepthMask(GL_FALSE);
+		skyboxShader.use();
 
 		shader.use();
 
-		cube.Draw(shader);
-		sphere2.Draw(shader);
 		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
 		glm::mat4 view = glm::mat4(1.0f);
 		view = glm::lookAt(
@@ -244,7 +297,14 @@ int main(void) {
 		}
 		
 
+		glBindVertexArray(skyboxVAO);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDepthMask(GL_TRUE);
+
 		//cylinder.Draw(ourShader);
+		cube.Draw(shader);
+		sphere2.Draw(shader);
 		tank.Draw(shader);
 		glBindVertexArray(0);
 
