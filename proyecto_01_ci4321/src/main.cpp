@@ -177,6 +177,10 @@ int main(void) {
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
 	cube.SetupGL();
 
+	Cube floor = Cube(20.0f, 0.5f, 20.0f);
+	cube.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+	cube.SetupGL();
+
 	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
 	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
 	sphere2.SetupGL();
