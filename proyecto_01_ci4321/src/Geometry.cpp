@@ -5,12 +5,14 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-Sphere::Sphere(float radius, int sectorCount, int stackCount, glm::vec3 position)
+Sphere::Sphere(float radius, int sectorCount, int stackCount, bool full)
 {
     this->radius = radius;
     this->sectorCount = sectorCount;
     this->stackCount = stackCount;
-    this->position = position;
+
+    position = glm::vec3(0.0, 0.0, 0.0);
+    rotation = glm::vec3(0.0, 0.0, 0.0);
 
     // Inicializacion de variables a utilizar para calcular posicon, normales y coordenadas de la textura
     float x, y, z, xy;                    
@@ -18,7 +20,13 @@ Sphere::Sphere(float radius, int sectorCount, int stackCount, glm::vec3 position
     float s, t;
 
     // Inicializacion de distancias entre longitudes y latitudes
-    float sectorStep = 2 * PI / sectorCount;
+    float sphereRange = 2 * PI;
+
+    if (!full) {
+        sphereRange = PI;
+    }
+
+    float sectorStep = sphereRange / sectorCount; // <- Poner sectorStep = PI/sectorCount para hacer media circunferencia (Top/Separado/despues)
     float stackStep = PI / stackCount;
 
     // Variables para los angulos a utilizar
@@ -108,15 +116,19 @@ Sphere::Sphere(float radius, int sectorCount, int stackCount, glm::vec3 position
     }
 }
 
-void Sphere::Draw(const Shader& ourShader)
+void Sphere::Draw(const Shader& shader)
 {
     // Creacion de transformaciones
     glm::mat4 model = glm::mat4(1.0f);
     
     model = glm::translate(model, position);
+
+    model = glm::rotate(model, rotation.x, glm::vec3(1.0, 0.0, 0.0));
+    model = glm::rotate(model, rotation.y, glm::vec3(0.0, 1.0, 0.0));
+    model = glm::rotate(model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
     
     // Recuperacion de las ubicaciones de los uniforms
-    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
    
     // Pase de ubicaciones a los shaders
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -165,12 +177,14 @@ void Sphere::CleanGL()
     glDeleteBuffers(1, &IBO);
 }
 
-Cube::Cube(float width, float height, float depth, glm::vec3 position)
+Cube::Cube(float width, float height, float depth)
 {
     this->width = width;
     this->height = height;
     this->depth = depth;
-    this->position = position;
+
+    position = glm::vec3(0.0, 0.0, 0.0);
+    rotation = glm::vec3(0.0, 0.0, 0.0);
 
     // Inicializacion del cambio de las caras con respecto al cubo unitario
     float w = width/2;
@@ -242,15 +256,19 @@ Cube::Cube(float width, float height, float depth, glm::vec3 position)
 
 };
 
-void Cube::Draw(const Shader& ourShader)
+void Cube::Draw(const Shader& shader)
 {
     // Creacion de transformaciones
     glm::mat4 model = glm::mat4(1.0f); 
    
     model = glm::translate(model, position);
 
+    model = glm::rotate(model, rotation.x, glm::vec3(1.0, 0.0, 0.0));
+    model = glm::rotate(model, rotation.y, glm::vec3(0.0, 1.0, 0.0));
+    model = glm::rotate(model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
+
     // Recuperacion de las ubicaciones de los uniforms
-    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
 
     // Pase de ubicaciones a los shaders
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -293,12 +311,15 @@ void Cube::CleanGL()
 }
 
 
-Cylinder::Cylinder(float radius, float height, int sectorCount, glm::vec3 position) {
+Cylinder::Cylinder(float radius, float height, int sectorCount) {
+
     // Crea un circulo en el plano XY
     this->radius = radius;
     this->height = height;
     this->sectorCount = sectorCount;
-    this->position = position;
+
+    position = glm::vec3(0.0, 0.0, 0.0);
+    rotation = glm::vec3(0.0, 0.0, 0.0);
         
     // Variables para generar las cosas
     float sectorStep = 2 * PI / sectorCount;
@@ -315,18 +336,24 @@ Cylinder::Cylinder(float radius, float height, int sectorCount, glm::vec3 positi
 
     attributes.clear();
 
+    int verticesCount = 0;
+
     for (int i = 0; i < 2; ++i) {
         float h = -height / 2.0f + i * height;
         float t = 1.0f - i;
         for (int j = 0, k = 0; j <= sectorCount; ++j, k += 3) {
+
             float ux = unitVertices[k];
             float uy = unitVertices[k + 1];
             float uz = unitVertices[k + 2];
+
             // Vectores de posicion
             // se añaden a la lista de vertices
             attributes.push_back(ux * radius);
             attributes.push_back(uy * radius);
             attributes.push_back(h);
+
+            verticesCount += 3;
 
             // Se añaden los vectores normales
             attributes.push_back(ux);
@@ -334,7 +361,6 @@ Cylinder::Cylinder(float radius, float height, int sectorCount, glm::vec3 positi
             attributes.push_back(uz);
                 
             // Coord de la textura;
-
             // Calculos de las coordenadas de los vertices en la textura, dentro del rango [0, 1]
             float s = (float)j / sectorCount;
 
@@ -343,13 +369,14 @@ Cylinder::Cylinder(float radius, float height, int sectorCount, glm::vec3 positi
         }
     }
     
-    int baseCenterIndex = (int)attributes.size() / 3;
+    // Se ubica el punto central del cilindro
+    int baseCenterIndex = verticesCount / 3;
     int topCenterIndex = baseCenterIndex + sectorCount + 1;
 
     for ( int i = 0; i < 2; ++i) {
+
         float h = -height / 2.0f + i * height;
         float nz = -1 + i * 2;
-        // se ubica el punto central del cilindro
         
         attributes.push_back(0);
         attributes.push_back(0);
@@ -421,7 +448,7 @@ Cylinder::Cylinder(float radius, float height, int sectorCount, glm::vec3 positi
             indices.push_back(k);
             indices.push_back(k + 1);
         }
-        else // last triangle
+        else // Ultimo triangulo
         {
             indices.push_back(topCenterIndex);
             indices.push_back(k);
@@ -473,15 +500,19 @@ void Cylinder::CleanGL()
     glDeleteBuffers(1, &IBO);
 }
 
-void Cylinder::Draw(const Shader& ourShader)
+void Cylinder::Draw(const Shader& shader)
 {
     // Creacion de transformaciones
     glm::mat4 model = glm::mat4(1.0f);
 
     model = glm::translate(model, position);
 
+    model = glm::rotate(model, rotation.x, glm::vec3(1.0, 0.0, 0.0));
+    model = glm::rotate(model, rotation.y, glm::vec3(0.0, 1.0, 0.0));
+    model = glm::rotate(model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
+
     // Recuperacion de las ubicaciones de los uniforms
-    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
 
     // Pase de ubicaciones a los shaders
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));

@@ -4,19 +4,29 @@
 #include "Geometry.h"
 
 using namespace std;
+const int wheelsCount = 5;
+const int boltsCount = 2;
 
 class Tank
 {
 public:
+
 	Tank();
-	void Draw(const Shader& ourShader);
+	void Draw(const Shader& shader);
 	void Clear();
+	void LoadTextures(Shader& shader);
+
+	unsigned int texture1;
+	unsigned int texture2;
+	unsigned int texture3;
 
 private:
-	Cube body;
-	Sphere top;
-	Cylinder canon;
-	Sphere wheels[4];
+
+	Cube* body;
+	Sphere* top;
+	Cylinder* canon;
+	Cylinder* wheels[wheelsCount];
+	Cube* bolts[boltsCount * wheelsCount];
 
 };
 

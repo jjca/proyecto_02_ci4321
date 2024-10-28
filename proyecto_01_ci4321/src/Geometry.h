@@ -15,10 +15,23 @@ public:
 	unsigned int VBO, VAO;
 	std::vector<float> attributes;
 	glm::vec3 position;
+	glm::vec3 rotation;
 
 	virtual void SetupGL() = 0;
 	virtual void CleanGL() = 0;
-	virtual void Draw(const Shader& ourShader) = 0;
+	virtual void Draw(const Shader& shader) = 0;
+
+	inline void SetPosition(glm::vec3 newPos) 
+	{
+		position = newPos;
+
+	};
+
+	inline void SetRotation(glm::vec3 newRot)
+	{
+		rotation = newRot;
+
+	};
 
 };
 
@@ -32,11 +45,11 @@ public:
 	int sectorCount;
 	int stackCount;
 
-	Sphere(float radius = 1.0, int sectorCount = 36, int stackCount = 18, glm::vec3 position = glm::vec3 (0.0,0.0,0.0));
+	Sphere(float radius = 1.0, int sectorCount = 36, int stackCount = 18, bool full = true);
 
 	void SetupGL() override;
 	void CleanGL() override;
-	void Draw(const Shader& ourShader) override;
+	void Draw(const Shader& shader) override;
 };
 
 class Cube : public Geometry
@@ -47,11 +60,11 @@ public:
 	float height;
 	float depth;
 
-	Cube(float width = 1.0, float height = 1.0, float depth = 1.0, glm::vec3 position = glm::vec3(0.0,0.0,0.0));
+	Cube(float width = 1.0, float height = 1.0, float depth = 1.0);
 
 	void SetupGL() override;
 	void CleanGL() override;
-	void Draw(const Shader& ourShader) override;
+	void Draw(const Shader& shader) override;
 };
 
 class Cylinder : public Geometry
@@ -67,11 +80,11 @@ public:
 	float sectorCount;
 	
 
-	Cylinder(float radius = 1.0, float height = 1.0, int sectorCount = 36, glm::vec3 position = glm::vec3(0.0, 0.0, 0.0));
+	Cylinder(float radius = 1.0, float height = 1.0, int sectorCount = 36);
 
 	void SetupGL() override;
 	void CleanGL() override;
-	void Draw(const Shader& ourShader) override;
+	void Draw(const Shader& shader) override;
 };
 
 
