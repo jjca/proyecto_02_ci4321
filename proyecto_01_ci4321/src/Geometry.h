@@ -16,6 +16,8 @@ public:
 	std::vector<float> attributes;
 	glm::vec3 position;
 	glm::vec3 rotation;
+	glm::vec3 pivot;
+	glm::vec3 size; // width, height, depth
 
 	virtual void SetupGL() = 0;
 	virtual void CleanGL() = 0;
@@ -27,11 +29,29 @@ public:
 
 	};
 
+	inline glm::vec3 getPosition()
+	{
+		return position;
+	};
+
 	inline void SetRotation(glm::vec3 newRot)
 	{
 		rotation = newRot;
 
 	};
+
+	inline void setPivot(glm::vec3 newPivot) 
+	{
+		pivot = newPivot;
+	};
+
+	inline void setSize(glm::vec3 creationSize) {
+		size = creationSize;
+};
+
+	inline glm::vec3 getSize() {
+		return size;
+	}
 
 };
 
@@ -92,6 +112,7 @@ public:
 	void CleanGL() override;
 	void Draw(const Shader& shader) override;
 	void DrawCanon(const Shader& shader);
+	void DrawProjectile(const Shader& shader, glm::vec3 canonPosition);
 	void moveForward();
 	void moveBackwards();
 };

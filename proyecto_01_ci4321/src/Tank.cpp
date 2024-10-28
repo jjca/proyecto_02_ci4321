@@ -95,7 +95,28 @@ void Tank::Draw(const Shader& shader)
 		bolts[j]->Draw(shader);
 	}
 
+	if (hasProjectile && !hasBeenShot) {
+		projectile = new Cylinder(0.1f, 1.0f, 64);
+		glm::vec3 projectilePos;
+		projectilePos = canon->position;
+		projectilePos.z = 0.1f;
+		glm::vec3 projectileRot = canon->rotation;
+		projectile->SetRotation(projectileRot);
 
+		projectile->SetPosition(projectilePos);
+		projectile->SetupGL();
+		hasBeenShot = true;
+	}
+	if (hasProjectile && hasBeenShot) {
+		if (projectile->rotation != glm::vec3(0.0f)) {
+			projectile->position += glm::vec3(0.0f, projectile->rotation.y, projectile->rotation.y) * 0.05f * 0.25f;
+			projectile->Draw(shader);
+		}
+		else {
+			projectile->position += glm::normalize(glm::vec3(0.0f, 0.0f, 0.50f)) * 0.05f * 0.25f;
+			projectile->Draw(shader);
+		}		
+	}
 }
 
 void Tank::Clear()
@@ -291,5 +312,23 @@ void Tank::rotateSphereRight(float deltaTime) {
 void Tank::rotateSphereLeft(float deltaTime) {
 	top->rotation += glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
 	}
-	canon->rotation += normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+
+void Tank::rotateBodyRight(float deltaTime) {
+	body->rotation -= glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+	for (int i = 0; i < wheelsCount; ++i) {
+		wheels[i]->rotation -= glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f)) * deltaTime;
+	}
+	
+}
+
+void Tank::rotateBodyLeft(float deltaTime) {
+	body->rotation += glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+	for (int i = 0; i < wheelsCount; ++i) {
+		wheels[i]->rotation += glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f)) * deltaTime;
+	}
+	
+}
+
+void Tank::fire() {
+	hasProjectile = true;
 }

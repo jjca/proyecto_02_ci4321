@@ -36,6 +36,9 @@ float fov = 45.0f;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+bool CheckCollision(Cube& one, Tank& two);
+bool CheckCollisionProjectile(Cube& one, Cylinder& two);
+
 // Metodos
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -137,6 +140,17 @@ int main(void) {
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
 	Tank tank;
+	Cube cube = Cube(2.0f, 2.0f, 2.0f);
+	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+	cube.SetupGL();
+
+	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
+	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
+	sphere2.SetupGL();
+
+	//Cylinder cylinder = Cylinder(2.0f, 3.0f, 36, glm::vec3(0.0f, 0.0f, 3.0f));
+
+	//cylinder.SetupGL();
 	tank.LoadTextures(shader);
 
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
@@ -160,6 +174,8 @@ int main(void) {
 
 		shader.use();
 
+		cube.Draw(shader);
+		sphere2.Draw(shader);
 		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
 		glm::mat4 view = glm::mat4(1.0f);
 		view = glm::lookAt(
@@ -193,7 +209,42 @@ int main(void) {
 			tank.moveBackwards(shader);
 		}
 
+		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.rotateBodyLeft(deltaTime);
+		}
 
+		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.rotateBodyRight(deltaTime);
+			
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.fire();
+
+		}
+
+		if (CheckCollision(cube, tank)) {
+			cube.CleanGL();
+		}
+
+		if (tank.hasBeenShotF()) {
+			Cylinder *projectile = tank.getProjectile();
+			if (CheckCollisionProjectile(cube, *projectile)) {
+				projectile->CleanGL();
+				cube.CleanGL();
+				tank.setHasBeenShot();
+			}
+			if (projectile->position.z >= 40.0f) {
+				projectile->CleanGL();
+				tank.setHasBeenShot();
+			}
+		}
+		
+
+		//cylinder.Draw(ourShader);
 		tank.Draw(shader);
 		glBindVertexArray(0);
 
@@ -212,4 +263,35 @@ int main(void) {
 	glfwTerminate();
 
 	return 0;
+}
+
+
+bool CheckCollision(Cube& one, Tank& two) // AABB - AABB collision
+{
+	// collision x-axis?
+	bool collisionX = one.position.x + one.size.x >= two.getPosition().x &&
+		two.getPosition().x + two.getSize().x >= one.position.x;
+	// collision y-axis?
+	bool collisionY = one.position.y + one.size.y >= two.getPosition().y &&
+		two.getPosition().y + two.getSize().y >= one.position.y;
+
+	bool collisionZ = one.position.z + one.size.z >= two.getPosition().z &&
+		two.getPosition().z + two.getSize().z >= one.position.z;
+	// collision only if on both axes
+	return collisionX && collisionY && collisionZ;
+}
+
+bool CheckCollisionProjectile(Cube& one, Cylinder& two) // AABB - AABB collision
+{
+	// collision x-axis?
+	bool collisionX = one.position.x + one.size.x >= two.getPosition().x &&
+		two.getPosition().x + two.getSize().x >= one.position.x;
+	// collision y-axis?
+	bool collisionY = one.position.y + one.size.y >= two.getPosition().y &&
+		two.getPosition().y + two.getSize().y >= one.position.y;
+
+	bool collisionZ = one.position.z + one.size.z >= two.getPosition().z &&
+		two.getPosition().z + two.getSize().z >= one.position.z;
+	// collision only if on both axes
+	return collisionX && collisionY && collisionZ;
 }
