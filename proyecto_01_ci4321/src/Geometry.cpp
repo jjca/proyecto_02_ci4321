@@ -177,6 +177,17 @@ void Sphere::CleanGL()
     glDeleteBuffers(1, &IBO);
 }
 
+void Sphere::moveForward() {
+    glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
+    position += translation;
+}
+
+void Sphere::moveBackwards() {
+    glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
+    position -= translation;
+}
+
+
 Cube::Cube(float width, float height, float depth)
 {
     this->width = width;
@@ -310,6 +321,25 @@ void Cube::CleanGL()
     glDeleteBuffers(1, &VBO);
 }
 
+void Cube::moveForward() {
+    glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
+    position += translation;
+}
+
+void Cube::moveBackwards() {
+    glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
+    position -= translation;
+}
+
+void Cube::moveRight() {
+    glm::vec3 translation = glm::vec3(0.01f, 0.0f, 0.0f);
+    position += translation;
+}
+
+void Cube::moveLeft() {
+    glm::vec3 translation = glm::vec3(0.01f, 0.0f, 0.0f);
+    position -= translation;
+}
 
 Cylinder::Cylinder(float radius, float height, int sectorCount) {
 
@@ -522,4 +552,14 @@ void Cylinder::Draw(const Shader& shader)
 
     glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, (void*)0);
 
+}
+
+void Cylinder::moveForward() {
+    glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
+    position += translation;
+}
+
+void Cylinder::moveBackwards() {
+    glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
+    position -= translation;
 }

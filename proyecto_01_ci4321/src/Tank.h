@@ -15,10 +15,15 @@ public:
 	void Draw(const Shader& shader);
 	void Clear();
 	void LoadTextures(Shader& shader);
-
+	void moveForward(const Shader& ourShader);
+	void moveBackwards(const Shader& ourShader);
 	unsigned int texture1;
 	unsigned int texture2;
 	unsigned int texture3;
+	void moveCanonUp(float deltaTime);
+	void moveCanonDown(float deltaTime);
+	void moveCanonRight(float deltaTime);
+	void moveCanonLeft(float deltaTime);
 
 private:
 

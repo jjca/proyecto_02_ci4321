@@ -116,6 +116,38 @@ void Tank::Clear()
 
 }
 
+void Tank::moveForward(const Shader& ourShader) {
+	
+	body->moveForward();
+	canon->moveForward();
+	top->moveForward();
+	for (int i = 0; i < wheelsCount; ++i) {
+		wheels[i]->moveForward();
+		wheels[i]->rotation -= normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+	}
+	for (int i = 0; i < boltsCount*wheelsCount; i++) {
+		bolts[i]->moveForward();
+		bolts[i]->rotation += normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * 0.05f;
+	}
+	
+}
+
+void Tank::moveBackwards(const Shader& ourShader) {
+
+	body->moveBackwards();
+	canon->moveBackwards();
+	top->moveBackwards();
+	for (int i = 0; i < wheelsCount; ++i) {
+		wheels[i]->moveBackwards();
+		wheels[i]->rotation += normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+	}
+	for (int i = 0; i < boltsCount * wheelsCount; i++) {
+		bolts[i]->moveBackwards();
+		bolts[i]->rotation -= normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * 0.05f;
+	}
+
+}
+
 void Tank::LoadTextures(Shader& shader)
 {
 	// Texturas
@@ -210,3 +242,34 @@ void Tank::LoadTextures(Shader& shader)
 }
 
 
+void Tank::moveCanonUp(float deltaTime) {
+	
+	if (canon->rotation.x <= -0.70f) {
+		canon->rotation.x = -0.70f;
+	}
+	canon->rotation -= normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
+
+	cout << canon->rotation.x << " " << canon->rotation.y << " " << canon->rotation.z << " " << endl;
+}
+
+void Tank::moveCanonDown(float deltaTime) {
+	if (canon->rotation.x >= 0.00f) {
+		canon->rotation.x = 0.00f;
+	}
+	canon->rotation += normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
+}
+
+void Tank::moveCanonRight(float deltaTime) {
+
+	if (canon->rotation.y <= -0.60f) {
+		canon->rotation.y = -0.60f;
+	}
+	canon->rotation -= normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+}
+
+void Tank::moveCanonLeft(float deltaTime) {
+	if (canon->rotation.y >= 0.60f) {
+		canon->rotation.y = 0.60f;
+	}
+	canon->rotation += normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+}

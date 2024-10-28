@@ -168,6 +168,31 @@ int main(void) {
 			cameraUp
 		);
 		shader.setMat4("view", view);
+		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+			tank.moveCanonUp(deltaTime);
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.moveCanonDown(deltaTime);
+		}
+		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.moveCanonRight(deltaTime);
+		}
+		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.moveCanonLeft(deltaTime);
+		}
+		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.moveForward(shader);
+		}
+		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+			//cube.moveForward(ourShader);
+			tank.moveBackwards(shader);
+		}
+
 
 		tank.Draw(shader);
 		glBindVertexArray(0);

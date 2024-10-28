@@ -50,6 +50,8 @@ public:
 	void SetupGL() override;
 	void CleanGL() override;
 	void Draw(const Shader& shader) override;
+	void moveForward();
+	void moveBackwards();
 };
 
 class Cube : public Geometry
@@ -65,6 +67,10 @@ public:
 	void SetupGL() override;
 	void CleanGL() override;
 	void Draw(const Shader& shader) override;
+	void moveForward();
+	void moveBackwards();
+	void moveRight();
+	void moveLeft();
 };
 
 class Cylinder : public Geometry
@@ -77,14 +83,16 @@ public:
 	
 	float radius;
 	float height;
-	float sectorCount;
-	
+	float sectorCount;	
+
 
 	Cylinder(float radius = 1.0, float height = 1.0, int sectorCount = 36);
 
 	void SetupGL() override;
 	void CleanGL() override;
 	void Draw(const Shader& shader) override;
+	void moveForward();
+	void moveBackwards();
 };
 
 
