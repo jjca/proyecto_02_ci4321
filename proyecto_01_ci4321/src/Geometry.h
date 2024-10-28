@@ -91,6 +91,7 @@ public:
 	void SetupGL() override;
 	void CleanGL() override;
 	void Draw(const Shader& shader) override;
+	void DrawCanon(const Shader& shader);
 	void moveForward();
 	void moveBackwards();
 };

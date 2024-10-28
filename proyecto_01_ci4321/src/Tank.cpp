@@ -6,13 +6,13 @@ Tank::Tank()
 	body = new Cube(4.0, 1.0, 4.25);
 	body->SetupGL();
 	
-	glm::vec3 topPos = body->position + glm::vec3(0.0, 0.5, -0.25);
+	glm::vec3 topPos = body->position + glm::vec3(0.0f, 0.5f, -0.25f);
 	top = new Sphere(1.25f, 36, 18, false);
 	top->SetPosition(topPos);
 	top->SetupGL();
 
-	glm::vec3 canonPos = top->position + glm::vec3(0.0, 0.5, 1.0);
-	canon = new Cylinder(0.25f, 3.0f, 64);
+	glm::vec3 canonPos = top->position + glm::vec3(0.0f, 0.5f, 1.0f);
+	canon = new Cylinder(0.25f, 2.0f, 64);
 	canon->SetPosition(canonPos);
 	canon->SetupGL();
 
@@ -75,7 +75,7 @@ void Tank::Draw(const Shader& shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture3);
 
-	canon->Draw(shader);
+	canon->DrawCanon(shader);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture1);
@@ -123,11 +123,12 @@ void Tank::moveForward(const Shader& ourShader) {
 	top->moveForward();
 	for (int i = 0; i < wheelsCount; ++i) {
 		wheels[i]->moveForward();
-		wheels[i]->rotation -= normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+		wheels[i]->rotation -= glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+
 	}
 	for (int i = 0; i < boltsCount*wheelsCount; i++) {
 		bolts[i]->moveForward();
-		bolts[i]->rotation += normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * 0.05f;
+		bolts[i]->rotation += glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * 0.05f;
 	}
 	
 }
@@ -139,11 +140,11 @@ void Tank::moveBackwards(const Shader& ourShader) {
 	top->moveBackwards();
 	for (int i = 0; i < wheelsCount; ++i) {
 		wheels[i]->moveBackwards();
-		wheels[i]->rotation += normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+		wheels[i]->rotation += glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
 	}
 	for (int i = 0; i < boltsCount * wheelsCount; i++) {
 		bolts[i]->moveBackwards();
-		bolts[i]->rotation -= normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * 0.05f;
+		bolts[i]->rotation -= glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * 0.05f;
 	}
 
 }
@@ -247,7 +248,8 @@ void Tank::moveCanonUp(float deltaTime) {
 	if (canon->rotation.x <= -0.70f) {
 		canon->rotation.x = -0.70f;
 	}
-	canon->rotation -= normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
+	else {
+		canon->rotation -= glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
 
 	cout << canon->rotation.x << " " << canon->rotation.y << " " << canon->rotation.z << " " << endl;
 }
@@ -256,20 +258,38 @@ void Tank::moveCanonDown(float deltaTime) {
 	if (canon->rotation.x >= 0.00f) {
 		canon->rotation.x = 0.00f;
 	}
-	canon->rotation += normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
+	else {
+		canon->rotation += glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
+	
 }
 
 void Tank::moveCanonRight(float deltaTime) {
 
-	if (canon->rotation.y <= -0.60f) {
-		canon->rotation.y = -0.60f;
+	if (canon->rotation.y <= -0.90f) {
+		canon->rotation.y = -0.90f;
+		
 	}
-	canon->rotation -= normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+	else {
+		canon->rotation -= glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+		rotateSphereRight(deltaTime);
 }
 
 void Tank::moveCanonLeft(float deltaTime) {
-	if (canon->rotation.y >= 0.60f) {
-		canon->rotation.y = 0.60f;
+	if (canon->rotation.y >= 0.90f) {
+		canon->rotation.y = 0.90f;
+	}
+	else {
+		canon->rotation += glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+		rotateSphereLeft(deltaTime);
+	}
+}
+
+void Tank::rotateSphereRight(float deltaTime) {
+	top->rotation -= glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
+}
+
+void Tank::rotateSphereLeft(float deltaTime) {
+	top->rotation += glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
 	}
 	canon->rotation += normalize(glm::vec3(0.0f, 1.0f, 0.0f)) * deltaTime;
 }

@@ -24,6 +24,8 @@ public:
 	void moveCanonDown(float deltaTime);
 	void moveCanonRight(float deltaTime);
 	void moveCanonLeft(float deltaTime);
+	void rotateSphereRight(float deltaTime);
+	void rotateSphereLeft(float deltaTime);
 
 private:
 

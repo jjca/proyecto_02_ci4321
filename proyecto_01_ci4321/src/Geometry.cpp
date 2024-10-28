@@ -554,6 +554,33 @@ void Cylinder::Draw(const Shader& shader)
 
 }
 
+void Cylinder::DrawCanon(const Shader& shader)
+{
+    // Creacion de transformaciones
+    glm::mat4 model = glm::mat4(1.0f);
+
+    model = glm::translate(model, position);
+    glm::vec3 pivot = glm::vec3(0.0f, 0.0f, -1.0f);
+    model = glm::translate(model, pivot);
+    model = glm::rotate(model, rotation.x, glm::vec3(1.0, 0.0, 0.0));
+    model = glm::rotate(model, rotation.y, glm::vec3(0.0, 1.0, 0.0));
+    model = glm::rotate(model, rotation.z, glm::vec3(0.0, 0.0, 1.0));
+    
+    model = glm::translate(model, -pivot);
+
+    // Recuperacion de las ubicaciones de los uniforms
+    unsigned int modelLoc = glGetUniformLocation(shader.ID, "model");
+
+    // Pase de ubicaciones a los shaders
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+    glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+}
+
 void Cylinder::moveForward() {
     glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.01f);
     position += translation;
