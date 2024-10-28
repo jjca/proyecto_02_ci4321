@@ -13,6 +13,11 @@
 * glew
 * glm
 * stb_image
+
+## Instrucciones de corrida
+
+Ejecutar el archivo "tank.exe", en la carpeta "\proyecto_01_ci4321\proyecto_01_ci4321".
+
  ## Movimiento del tanque:
  * Avanzar: flecha superior.
  * Retroceder: flecha inferior.
