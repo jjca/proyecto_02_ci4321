@@ -177,9 +177,9 @@ int main(void) {
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
 	cube.SetupGL();
 
-	Cube floor = Cube(20.0f, 0.5f, 20.0f);
-	cube.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-	cube.SetupGL();
+	Cube floor = Cube(100.0f, 0.1f, 100.0f);
+	floor.SetPosition(glm::vec3(0.0f, -1.6f, 0.0f));
+	floor.SetupGL();
 
 	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
 	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
@@ -196,17 +196,18 @@ int main(void) {
 	// Skybox area
 	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
 
-	unsigned int skyboxVAO;
-	glGenVertexArrays(1, &skyboxVAO);
+	Cube skyboxCube = Cube(100.0f, 100.0f, 100.0f);
+	// skyboxCube.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+	skyboxCube.SetupGL();
 
 	vector<std::string> faces
 	{
-		"resources/textures/skybox.png",
-			"resources/textures/skybox.png",
-			"resources/textures/skybox.png",
-			"resources/textures/skybox.png",
-			"resources/textures/skybox.png",
-			"resources/textures/skybox.png"
+		"resources/textures/right.png",
+			"resources/textures/left.png",
+			"resources/textures/down.png",
+			"resources/textures/up.png",
+			"resources/textures/front.png",
+			"resources/textures/back.png"
 	};
 
 	unsigned int cubemapTexture = loadSkybox(faces);
@@ -224,22 +225,21 @@ int main(void) {
 
 
 		/* Limpieza del buffer y el buffer de profundidad */
-		//glClearColor(0.761f, 1.0f, 0.992f, 1.0f);
+		glClearColor(0.761f, 1.0f, 0.992f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-		glDepthMask(GL_FALSE);
-		skyboxShader.use();
-
-		shader.use();
-
-		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::lookAt(
+		glm::mat4 view = glm::lookAt(
 			cameraPos,
 			cameraPos + cameraFront,
 			cameraUp
 		);
+
+
+		shader.use();
+
+		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
+		//glm::mat4 view = glm::mat4(1.0f);
+
 		shader.setMat4("view", view);
 		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 			tank.moveCanonUp(deltaTime);
@@ -299,18 +299,29 @@ int main(void) {
 				tank.setHasBeenShot();
 			}
 		}
-		
-
-		glBindVertexArray(skyboxVAO);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glDepthMask(GL_TRUE);
 
 		//cylinder.Draw(ourShader);
-		cube.Draw(shader);
+		floor.Draw(shader);
 		sphere2.Draw(shader);
 		tank.Draw(shader);
+		// glBindVertexArray(0);
+
+		glDepthFunc(GL_LEQUAL);
+		skyboxShader.use();
+
+		view = glm::mat4(glm::mat3(glm::lookAt(
+			cameraPos,
+			cameraPos + cameraFront,
+			cameraUp
+		)));
+
+		skyboxShader.setMat4("view", view);
+		skyboxShader.setMat4("projection", projection);
+
+		skyboxCube.Draw(skyboxShader);
 		glBindVertexArray(0);
+		glDepthFunc(GL_LESS);
+
 
 		/* Intercambio entre buffers */
 		glfwSwapBuffers(window);
