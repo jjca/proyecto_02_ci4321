@@ -8,6 +8,7 @@ uniform mat4 view;
 
 void main()
 {
-    TexCoords = aPos;
+    // TexCoords = aPos;
+    TexCoords = vec3(aPos.x, 1.0 - aPos.y, aPos.z); // Flip the Y coordinate
     gl_Position = projection * view * vec4(aPos, 1.0);
 }  
