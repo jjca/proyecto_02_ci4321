@@ -140,7 +140,14 @@ void Sphere::Draw(const Shader& shader)
 
 }
 
-void Sphere::SetupGL()
+void Sphere::Bind(unsigned int textureID)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+}
+
+void Sphere::Load()
 {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -170,7 +177,7 @@ void Sphere::SetupGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Sphere::CleanGL()
+void Sphere::Clean()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -291,8 +298,14 @@ void Cube::Draw(const Shader& shader)
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
 }
+void Cube::Bind(unsigned int textureID)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 
-void Cube::SetupGL()
+}
+
+void Cube::Load()
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -316,7 +329,7 @@ void Cube::SetupGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Cube::CleanGL()
+void Cube::Clean()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -340,6 +353,13 @@ void Cube::moveRight() {
 void Cube::moveLeft() {
     glm::vec3 translation = glm::vec3(0.01f, 0.0f, 0.0f);
     position -= translation;
+}
+
+void Cubemap::Bind(unsigned int textureID)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
 }
 
 Cylinder::Cylinder(float radius, float height, int sectorCount) {
@@ -491,7 +511,7 @@ Cylinder::Cylinder(float radius, float height, int sectorCount) {
     }
 }
 
-void Cylinder::SetupGL() {
+void Cylinder::Load() {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
@@ -526,7 +546,7 @@ void Cylinder::SetupGL() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Cylinder::CleanGL()
+void Cylinder::Clean()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
@@ -554,6 +574,13 @@ void Cylinder::Draw(const Shader& shader)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
     glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+}
+
+void Cylinder::Bind(unsigned int textureID)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 
 }
 

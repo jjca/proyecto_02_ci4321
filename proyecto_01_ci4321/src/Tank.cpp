@@ -1,20 +1,23 @@
 #include "Tank.h"
-#include "stb_image/stb_image.h"
 
-Tank::Tank()
+Tank::Tank(unsigned int metalG, unsigned int blocks, unsigned int metal)
 {
+	this->metalG = metalG;
+	this->blocks = blocks;
+	this->metal = metal;
+
 	body = new Cube(4.0, 1.0, 4.25);
-	body->SetupGL();
+	body->Load();
 	
 	glm::vec3 topPos = body->position + glm::vec3(0.0f, 0.5f, -0.25f);
 	top = new Sphere(1.25f, 36, 18, false);
 	top->SetPosition(topPos);
-	top->SetupGL();
+	top->Load();
 
 	glm::vec3 canonPos = top->position + glm::vec3(0.0f, 0.5f, 1.0f);
 	canon = new Cylinder(0.25f, 2.0f, 64);
 	canon->SetPosition(canonPos);
-	canon->SetupGL();
+	canon->Load();
 
 	for (int i = 0; i < wheelsCount; i++) {
 
@@ -43,13 +46,12 @@ Tank::Tank()
 		wheels[i]->SetPosition(wheelPos);
 		wheels[i]->SetRotation(glm::vec3(0.0, glm::radians(90.0), 0.0));
 
-		wheels[i]->SetupGL();
+		wheels[i]->Load();
 
 		float centerHeight = wheels[i]->height/2;
 		float faceRadius = wheels[i]->radius/2;
 
 		for (int j = boltsCount*i; j < boltsCount*(i + 1); j++) {
-			cout << j << endl;
 			glm::vec3 boltPos = wheels[i]->position;
 
 			switch (j % boltsCount)
@@ -65,33 +67,30 @@ Tank::Tank()
 			bolts[j] = new Cube(0.1, 0.4, 0.4);
 			bolts[j]->SetPosition(boltPos);
 
-			bolts[j]->SetupGL();
+			bolts[j]->Load();
 		}
 	}
 }
 
 void Tank::Draw(const Shader& shader)
 {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture3);
-
+	canon->Bind(metal);
 	canon->DrawCanon(shader);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-
+	body->Bind(metalG);
 	body->Draw(shader);
+
+	top->Bind(metalG);
 	top->Draw(shader);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture2);
 	for (int i = 0; i < wheelsCount; i++) {
+		wheels[i]->Bind(blocks);
 		wheels[i]->Draw(shader);
 	}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture3);
+
 	for (int j = 0; j < boltsCount*wheelsCount; j++) {
+		bolts[j]->Bind(metal);
 		bolts[j]->Draw(shader);
 	}
 
@@ -104,7 +103,7 @@ void Tank::Draw(const Shader& shader)
 		projectile->SetRotation(projectileRot);
 
 		projectile->SetPosition(projectilePos);
-		projectile->SetupGL();
+		projectile->Load();
 		hasBeenShot = true;
 	}
 	if (hasProjectile && hasBeenShot) {
@@ -121,18 +120,18 @@ void Tank::Draw(const Shader& shader)
 
 void Tank::Clear()
 {
-	canon->CleanGL();
-	body->CleanGL();
-	top->CleanGL();
+	canon->Clean();
+	body->Clean();
+	top->Clean();
 
 	for (int i = 0; i < wheelsCount; i++) {
 
-		wheels[i]->CleanGL();
+		wheels[i]->Clean();
 
 	}
 
 	for (int j = 0; j < boltsCount*wheelsCount; j++) {
-		bolts[j]->CleanGL();
+		bolts[j]->Clean();
 	}
 
 }
@@ -170,100 +169,6 @@ void Tank::moveBackwards(const Shader& ourShader) {
 
 }
 
-void Tank::LoadTextures(Shader& shader)
-{
-	// Texturas
-	glGenTextures(1, &texture1);
-	glGenTextures(1, &texture2);
-	glGenTextures(1, &texture3);
-
-	// Textura 1
-	// Seteamos a la textura 1 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture1);
-
-	// Seteamos los parametros de wrapping de la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Cargamos la imagen, creamos la textura y generamos los mipmaps
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	unsigned char* data = stbi_load("resources/textures/metal_green.png", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	// Textura 2
-	// Seteamos a la textura 2 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
-	// Seteamos los parametros de wrapping de la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Cargamos la imagen, creamos la textura y generamos los mipmaps
-	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	data = stbi_load("resources/textures/blocks.png", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	// Textura 3
-	// Seteamos a la textura 3 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture3);
-
-	// Seteamos los parametros de wrapping de la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Cargamos la imagen, creamos la textura y generamos los mipmaps
-	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	data = stbi_load("resources/textures/metal.png", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	shader.use();
-	shader.setInt("texture1", 0);
-}
-
-
 void Tank::moveCanonUp(float deltaTime) {
 	
 	if (canon->rotation.x <= -0.70f) {
@@ -272,7 +177,6 @@ void Tank::moveCanonUp(float deltaTime) {
 	else {
 		canon->rotation -= glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)) * deltaTime;
 	}
-	cout << canon->rotation.x << " " << canon->rotation.y << " " << canon->rotation.z << " " << endl;
 }
 
 void Tank::moveCanonDown(float deltaTime) {
