@@ -108,22 +108,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 
 }
 
-void loadTextures()
+unsigned int LoadTexture(std::string path)
 {
-	unsigned int texture1;
-	unsigned int texture2;
-	unsigned int texture3;
-	unsigned int texture4;
+	unsigned int texture;
+	glGenTextures(1, &texture);
 
-	// Texturas
-	glGenTextures(1, &texture1);
-	glGenTextures(1, &texture2);
-	glGenTextures(1, &texture3);
-	glGenTextures(1, &texture4);
-
-	// Textura 1
-	// Seteamos a la textura 1 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	// Seteamos a la textura como textura actual
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	// Seteamos los parametros de wrapping de la textura
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -136,7 +127,7 @@ void loadTextures()
 	// Cargamos la imagen, creamos la textura y generamos los mipmaps
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	unsigned char* data = stbi_load("resources/textures/metal_green.png", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 
 	if (data)
 	{
@@ -148,94 +139,17 @@ void loadTextures()
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
+	return texture;
+}
 
-	// Textura 2
-	// Seteamos a la textura 2 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture2);
+void LoadTextures()
+{
 
-	// Seteamos los parametros de wrapping de la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	textures["metalgreen"] = LoadTexture("resources/textures/metal_green.png");
+	textures["block"] = LoadTexture("resources/textures/blocks.png");
+	textures["metal"] = LoadTexture("resources/textures/metal.png");
+	textures["ground"] = LoadTexture("resources/textures/Grass.png");
 
-	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Cargamos la imagen, creamos la textura y generamos los mipmaps
-	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	data = stbi_load("resources/textures/blocks.png", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	// Textura 3
-	// Seteamos a la textura 3 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture3);
-
-	// Seteamos los parametros de wrapping de la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Cargamos la imagen, creamos la textura y generamos los mipmaps
-	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	data = stbi_load("resources/textures/metal.png", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	// Textura 4
-	// Seteamos a la textura 4 como textura actual
-	glBindTexture(GL_TEXTURE_2D, texture4);
-
-	// Seteamos los parametros de wrapping de la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Cargamos la imagen, creamos la textura y generamos los mipmaps
-	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
-	data = stbi_load("resources/textures/Grass.png", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	textures["metalgreen"] = texture1;
-	textures["block"] = texture2;
-	textures["metal"] = texture3;
-	textures["ground"] = texture4;
-
-	cout << texture4 << endl;
 }
 
 int main(void) {
@@ -271,7 +185,7 @@ int main(void) {
 	// Habilitamos la profundidad
 	glEnable(GL_DEPTH_TEST);
 
-	loadTextures();
+	LoadTextures();
 
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
@@ -287,9 +201,6 @@ int main(void) {
 	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
 	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
 	sphere2.Load();
-
-	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-	shader.setMat4("projection", projection);
 
 	// Skybox area
 	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
@@ -310,6 +221,9 @@ int main(void) {
 	// Configuracion del shader
 	shader.use();
 	shader.setInt("texture1", 0);
+
+	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	shader.setMat4("projection", projection);
 
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
@@ -340,11 +254,9 @@ int main(void) {
 
 
 		shader.use();
-
-		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
-		//glm::mat4 view = glm::mat4(1.0f);
-
 		shader.setMat4("view", view);
+
+
 		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 			tank.moveCanonUp(deltaTime);
 		}
