@@ -170,10 +170,17 @@ int main(void) {
 
 	// Habilitamos la profundidad
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Main shader
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
+	//Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
+	//textShader.use();
+
+	glm::mat4 textProj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+	
 	// Inicialización de los objetos visibles. Tanque, esferas, suelo
 	Tank tank;
 	Cube cube = Cube(2.0f, 2.0f, 2.0f);
@@ -200,16 +207,12 @@ int main(void) {
 	// Skybox area
 	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
 
-	//Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
-	//textShader.use();
+	Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
 	
-	Text texto;
-	texto(100, 200);
-
 	Cube skyboxCube = Cube(100.0f, 100.0f, 100.0f);
 	// skyboxCube.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 	skyboxCube.SetupGL();
-
+	Text texto = Text(HEIGHT, WIDTH);
 	vector<std::string> faces
 	{
 		"resources/textures/right.png",
@@ -244,7 +247,7 @@ int main(void) {
 			cameraUp
 		);
 
-
+		
 		shader.use();
 		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
 		//glm::mat4 view = glm::mat4(1.0f);
@@ -331,6 +334,12 @@ int main(void) {
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS);
 
+		textShader.use();
+		texto.LoadText("hola", 48);
+		textShader.setMat4("projection", textProj);
+		texto.RenderText("Hola Jorge", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), textShader);
+		texto.RenderText("Esto tiene lag", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f), textShader);
+
 
 		/* Intercambio entre buffers */
 		glfwSwapBuffers(window);
@@ -342,6 +351,7 @@ int main(void) {
 
 	// Borramos el contenido de los buffers
 	tank.Clear();
+	texto.CleanGL();
 
 	/* Cierre de glfw */
 	glfwTerminate();

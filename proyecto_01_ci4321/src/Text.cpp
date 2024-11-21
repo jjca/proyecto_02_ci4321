@@ -10,11 +10,7 @@
 using namespace std;
 
 Text::Text(unsigned int height, unsigned int width) {
-	this->textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
-	this->textShader.setMat4("projection", glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f));
 
-//	glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
 	glBindVertexArray(this->VAO);
@@ -26,7 +22,7 @@ Text::Text(unsigned int height, unsigned int width) {
 	glBindVertexArray(0);
 }
 
-void Text::LoadText(string font, unsigned int fontsize) {
+void Text::LoadText(string font, unsigned int fontSize) {
 	this->Characters.clear();
 	// Inicializamos freetype
 	FT_Library ft;
@@ -36,14 +32,12 @@ void Text::LoadText(string font, unsigned int fontsize) {
 
 	// Cargamos la fuente. Por pruebas usaremos Arial
 	FT_Face face;
-
-
 	if (FT_New_Face(ft, "resources/fonts/arial.ttf", 0, &face)) {
 		cout << "ERROR::FREETYPE: Could not load font" << endl;
 	}
 	else {
 		//	// Ajustamos el tamaño de la fuente
-		FT_Set_Pixel_Sizes(face, 0, 48);
+		FT_Set_Pixel_Sizes(face, 0, fontSize);
 
 		// Prueba cargar la letra X
 		if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
@@ -86,7 +80,7 @@ void Text::LoadText(string font, unsigned int fontsize) {
 				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 				face->glyph->advance.x
 			};
-			Characters.insert(std::pair<char, Character>(c, character));
+			Characters.insert(pair<char, Character>(c, character));
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -95,13 +89,12 @@ void Text::LoadText(string font, unsigned int fontsize) {
 	
 }
 
-void Text::RenderText(string text, float x, float y, float scale, glm::vec3 color)
+void Text::RenderText(string text, float x, float y, float scale, glm::vec3 color, Shader s)
 {
 	// activate corresponding render state	
-	this->textShader.use();
 	glUniform3f(glGetUniformLocation(s.ID, "textColor"), color.x, color.y, color.z);
 	glActiveTexture(GL_TEXTURE0);
-	glBindVertexArray(VAO);
+	glBindVertexArray(this->VAO);
 
 	// iterate through all characters
 	std::string::const_iterator c;
@@ -127,7 +120,7 @@ void Text::RenderText(string text, float x, float y, float scale, glm::vec3 colo
 		// render glyph texture over quad
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 		// update content of VBO memory
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		// render quad
@@ -137,4 +130,10 @@ void Text::RenderText(string text, float x, float y, float scale, glm::vec3 colo
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Text::CleanGL()
+{
+	glDeleteVertexArrays(1, &this->VAO);
+	glDeleteBuffers(1, &this->VBO);
 }

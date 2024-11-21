@@ -17,13 +17,14 @@ struct Character {
 
 class Text {
 	public:
-		Shader textShader;
+		//Shader textShader;
 		unsigned int VAO, VBO;
 		map<char, Character> Characters;
+		void CleanGL();
 		//virtual void CleanGL();
 		Text(unsigned int height, unsigned int width);
 		void LoadText(string font, unsigned int size);
-		void RenderText(string text, float x, float y, float scale, glm::vec3 color);
+		void RenderText(string text, float x, float y, float scale, glm::vec3 color, Shader s);
 };
 
 #endif
