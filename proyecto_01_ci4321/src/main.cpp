@@ -10,10 +10,9 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <filesystem>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 #include "Geometry.h"
 #include "Tank.h"
+#include "Text.h"
 
 using namespace std;
 
@@ -40,16 +39,6 @@ float lastFrame = 0.0f;
 
 bool CheckCollision(Cube& one, Tank& two);
 bool CheckCollisionProjectile(Cube& one, Cylinder& two);
-
-struct Character {
-	unsigned int TextureID; // ID
-	glm::ivec2	 Size; // Tamaño 
-	glm::ivec2	 Bearing; // Offset desde l alínea base hasta el top o la izq
-	unsigned int Advance; // Offset hacia el siguiente glifo
-};
-
-
-map<GLchar, Character> Characters;
 
 // Metodos
 void processInput(GLFWwindow* window) {
@@ -182,8 +171,10 @@ int main(void) {
 	// Habilitamos la profundidad
 	glEnable(GL_DEPTH_TEST);
 
+	// Main shader
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
+	// Inicialización de los objetos visibles. Tanque, esferas, suelo
 	Tank tank;
 	Cube cube = Cube(2.0f, 2.0f, 2.0f);
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
@@ -200,6 +191,7 @@ int main(void) {
 	//Cylinder cylinder = Cylinder(2.0f, 3.0f, 36, glm::vec3(0.0f, 0.0f, 3.0f));
 
 	//cylinder.SetupGL();
+	// Carga las texturas del tanque
 	tank.LoadTextures(shader);
 
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
@@ -208,71 +200,12 @@ int main(void) {
 	// Skybox area
 	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
 
-	// Inicializamos freetype
-
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft)) {
-		std::cout << "ERROR::FREETYPE: Could not initialize FT " << std::endl;
-		return -1;
-	}
-	// Cargamos la fuente. Por pruebas usaremos Arial
-	FT_Face face;
-
-	if (FT_New_Face(ft, "resources/fonts/arial.ttf", 0, &face)) {
-		cout << "ERROR::FREETYPE: Could not load font" << endl;
-		return -1;
-	}
-	else {
-		// Ajustamos el tamaño de la fuente
-		FT_Set_Pixel_Sizes(face, 0, 48);
-		if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-		{
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-			return -1;
-		}
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		for (unsigned char c = 0; c < 128; c++) {
-			// load character glyph 
-			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-			{
-				cout << "ERROR::FREETYTPE: Failed to load Glyph" << endl;
-				continue;
-			}
-			// generate texture
-			unsigned int texture;
-			glGenTextures(1, &texture);
-			glBindTexture(GL_TEXTURE_2D, texture);
-			glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				GL_RED,
-				face->glyph->bitmap.width,
-				face->glyph->bitmap.rows,
-				0,
-				GL_RED,
-				GL_UNSIGNED_BYTE,
-				face->glyph->bitmap.buffer
-			);
-			// set texture options
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			// now store character for later use
-			Character character = {
-				texture,
-				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-				face->glyph->advance.x
-			};
-			Characters.insert(std::pair<char, Character>(c, character));
-		}
-	}
-
-	FT_Done_Face(face);
-	FT_Done_FreeType(ft);
+	//Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
+	//textShader.use();
 	
+	Text texto;
+	texto(100, 200);
+
 	Cube skyboxCube = Cube(100.0f, 100.0f, 100.0f);
 	// skyboxCube.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 	skyboxCube.SetupGL();
@@ -313,7 +246,6 @@ int main(void) {
 
 
 		shader.use();
-
 		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
 		//glm::mat4 view = glm::mat4(1.0f);
 
