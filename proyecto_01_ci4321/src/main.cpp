@@ -1,17 +1,20 @@
-#include "Shader.h"
 #include <cstdlib>
 #include <map>
 #include <iostream>
 #include <string>
+#include <map>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "stb_image/stb_image.h"
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <filesystem>
+
+#include "stb_image/stb_image.h"
+#include "Shader.h"
 #include "Geometry.h"
 #include "Tank.h"
+#include "Skybox.h"
 #include "Text.h"
 
 using namespace std;
@@ -36,6 +39,8 @@ float fov = 45.0f;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+map<std::string,unsigned int> textures;
 
 bool CheckCollision(Cube& one, Tank& two);
 bool CheckCollisionProjectile(Cube& one, Cylinder& two);
@@ -63,7 +68,6 @@ void processInput(GLFWwindow* window) {
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-
 
 	if (firstMouse) {
 		lastX = xpos;
@@ -103,40 +107,52 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 		fov = 1.0f;
 	if (fov > 45.0f)
 		fov = 45.0f;
+
 }
 
-unsigned int loadSkybox(vector<std::string> faces)
+unsigned int LoadTexture(std::string path)
+{
+	unsigned int texture;
+	glGenTextures(1, &texture);
+
+	// Seteamos a la textura como textura actual
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Seteamos los parametros de wrapping de la textura
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// Steamos parametros de filtro en la textura
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Cargamos la imagen, creamos la textura y generamos los mipmaps
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true); // Es necesario girar la textura en el eje Y, por como funciona OpenGL
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	return texture;
+}
+
+void LoadTextures()
 {
 
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	textures["metalgreen"] = LoadTexture("resources/textures/metal_green.png");
+	textures["block"] = LoadTexture("resources/textures/blocks.png");
+	textures["metal"] = LoadTexture("resources/textures/metal.png");
+	textures["ground"] = LoadTexture("resources/textures/Grass.png");
 
-	int width, height, nrChannels;
-	for (unsigned int i = 0; i < faces.size(); i++)
-	{
-		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-		if (data)
-		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-			);
-			stbi_image_free(data);
-		}
-		else
-		{
-			std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
-			stbi_image_free(data);
-		}
-	}
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	return textureID;
-};
+}
 
 int main(void) {
 
@@ -173,57 +189,56 @@ int main(void) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	LoadTextures();
+
 	// Main shader
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
-	//Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
-	//textShader.use();
-
-	glm::mat4 textProj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
-	
-	// Inicialización de los objetos visibles. Tanque, esferas, suelo
-	Tank tank;
+	Tank tank(textures["metalgreen"], textures["block"], textures["metal"]);
 	Cube cube = Cube(2.0f, 2.0f, 2.0f);
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
-	cube.SetupGL();
+	cube.Load();
 
 	Cube floor = Cube(100.0f, 0.1f, 100.0f);
 	floor.SetPosition(glm::vec3(0.0f, -1.6f, 0.0f));
-	floor.SetupGL();
+	floor.Load();
 
 	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
 	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
-	sphere2.SetupGL();
-
-	//Cylinder cylinder = Cylinder(2.0f, 3.0f, 36, glm::vec3(0.0f, 0.0f, 3.0f));
-
-	//cylinder.SetupGL();
-	// Carga las texturas del tanque
-	tank.LoadTextures(shader);
-
-	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-	shader.setMat4("projection", projection);
+	sphere2.Load();
 
 	// Skybox area
 	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
 
-	Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
-	
-	Cube skyboxCube = Cube(100.0f, 100.0f, 100.0f);
-	// skyboxCube.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-	skyboxCube.SetupGL();
-	Text texto = Text(HEIGHT, WIDTH);
 	vector<std::string> faces
 	{
-		"resources/textures/right.png",
-			"resources/textures/left.png",
-			"resources/textures/down.png",
-			"resources/textures/up.png",
-			"resources/textures/front.png",
-			"resources/textures/back.png"
+		"resources/textures/right2.png",
+			"resources/textures/left2.png",
+			"resources/textures/up2.png",
+			"resources/textures/down2.png",
+			"resources/textures/front2.png",
+			"resources/textures/back2.png"
 	};
 
-	unsigned int cubemapTexture = loadSkybox(faces);
+	Skybox skybox = Skybox();
+	skybox.Load(faces);
+
+	// Configuracion del shader
+	shader.use();
+	shader.setInt("texture1", 0);
+
+	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	shader.setMat4("projection", projection);
+
+	skyboxShader.use();
+	skyboxShader.setInt("skybox", 0);
+	
+	cout << textures["ground"] << endl;
+
+	/* Text area*/
+	glm::mat4 textProj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
+	Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
+	Text texto = Text(HEIGHT, WIDTH);
 
 	/* Ciclo hasta que el usuario cierre la ventana */
 	while (!glfwWindowShouldClose(window))
@@ -249,10 +264,9 @@ int main(void) {
 
 		
 		shader.use();
-		// Aplicamos la matriz del view (hacia donde esta viendo la camara)
-		//glm::mat4 view = glm::mat4(1.0f);
-
 		shader.setMat4("view", view);
+
+
 		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 			tank.moveCanonUp(deltaTime);
 		}
@@ -296,43 +310,32 @@ int main(void) {
 		}
 
 		if (CheckCollision(cube, tank)) {
-			cube.CleanGL();
+			cube.Clean();
 		}
 
 		if (tank.hasBeenShotF()) {
 			Cylinder *projectile = tank.getProjectile();
 			if (CheckCollisionProjectile(cube, *projectile)) {
-				projectile->CleanGL();
-				cube.CleanGL();
+				projectile->Clean();
+				cube.Clean();
 				tank.setHasBeenShot();
 			}
 			if (projectile->position.z >= 40.0f) {
-				projectile->CleanGL();
+				projectile->Clean();
 				tank.setHasBeenShot();
 			}
 		}
 
-		//cylinder.Draw(ourShader);
+		floor.Bind(textures["ground"]);
 		floor.Draw(shader);
+
+		sphere2.Bind(textures["metal"]);
 		sphere2.Draw(shader);
+
 		tank.Draw(shader);
-		// glBindVertexArray(0);
+		skybox.Draw(skyboxShader,cameraPos,cameraFront,cameraUp,projection);
 
-		glDepthFunc(GL_LEQUAL);
-		skyboxShader.use();
-
-		view = glm::mat4(glm::mat3(glm::lookAt(
-			cameraPos,
-			cameraPos + cameraFront,
-			cameraUp
-		)));
-
-		skyboxShader.setMat4("view", view);
-		skyboxShader.setMat4("projection", projection);
-
-		skyboxCube.Draw(skyboxShader);
 		glBindVertexArray(0);
-		glDepthFunc(GL_LESS);
 
 		textShader.use();
 		texto.LoadText("hola", 48);

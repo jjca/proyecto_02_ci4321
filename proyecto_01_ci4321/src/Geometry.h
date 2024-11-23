@@ -19,9 +19,10 @@ public:
 	glm::vec3 pivot;
 	glm::vec3 size; // width, height, depth
 
-	virtual void SetupGL() = 0;
-	virtual void CleanGL() = 0;
+	virtual void Load() = 0;
+	virtual void Clean() = 0;
 	virtual void Draw(const Shader& shader) = 0;
+	virtual void Bind(unsigned int textureID) = 0;
 
 	inline void SetPosition(glm::vec3 newPos) 
 	{
@@ -67,9 +68,10 @@ public:
 
 	Sphere(float radius = 1.0, int sectorCount = 36, int stackCount = 18, bool full = true);
 
-	void SetupGL() override;
-	void CleanGL() override;
+	void Load() override;
+	void Clean() override;
 	void Draw(const Shader& shader) override;
+	void Bind(unsigned int textureID) override;
 	void moveForward();
 	void moveBackwards();
 };
@@ -84,13 +86,24 @@ public:
 
 	Cube(float width = 1.0, float height = 1.0, float depth = 1.0);
 
-	void SetupGL() override;
-	void CleanGL() override;
+	void Load() override;
+	void Clean() override;
 	void Draw(const Shader& shader) override;
+	void Bind(unsigned int textureID) override;
 	void moveForward();
 	void moveBackwards();
 	void moveRight();
 	void moveLeft();
+};
+
+class Cubemap : public Cube
+{
+public:
+
+	Cubemap(float width = 1.0, float height = 1.0, float depth = 1.0) :Cube(width, height, depth) {}
+
+	void Bind(unsigned int textureID) override;
+
 };
 
 class Cylinder : public Geometry
@@ -108,11 +121,12 @@ public:
 
 	Cylinder(float radius = 1.0, float height = 1.0, int sectorCount = 36);
 
-	void SetupGL() override;
-	void CleanGL() override;
+	void Load() override;
+	void Clean() override;
 	void Draw(const Shader& shader) override;
 	void DrawCanon(const Shader& shader);
 	void DrawProjectile(const Shader& shader, glm::vec3 canonPosition);
+	void Bind(unsigned int textureID) override;
 	void moveForward();
 	void moveBackwards();
 };
