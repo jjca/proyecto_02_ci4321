@@ -240,6 +240,11 @@ int main(void) {
 	Shader textShader("src/Shaders/text.vs", "src/Shaders/text.fs");
 	Text texto = Text(HEIGHT, WIDTH);
 
+	string tecla = " ";
+	string titulo = "Camionetica poderosa";
+	string mensaje1 = "Moviendo hacia ";
+	string Mensajito = mensaje1.append(tecla);
+
 	/* Ciclo hasta que el usuario cierre la ventana */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -284,11 +289,25 @@ int main(void) {
 			tank.moveCanonLeft(deltaTime);
 		}
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+			cout << "Antes" << tecla << endl;
+			//tecla.replace(0, 8, "adelante");
+			tecla = "adelante";
+			Mensajito.replace(16, 9, tecla);
+			cout << tecla << endl;
+
+			cout << Mensajito << endl;
 			//cube.moveForward(ourShader);
 			tank.moveForward(shader);
 		}
 		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			//cube.moveForward(ourShader);
+			cout << "Antes" << tecla << endl;
+			//tecla.replace(0, 5, "atras");
+			tecla = "atras";
+			Mensajito.replace(16, 9, tecla);
+			cout << tecla << endl;
+
+			cout << Mensajito << endl;
 			tank.moveBackwards(shader);
 		}
 
@@ -305,8 +324,9 @@ int main(void) {
 
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 			//cube.moveForward(ourShader);
+			texto.RenderText("PLOMO", 570.0f, 240.0f, 0.5f, glm::vec3(0.5, 0.8f, 0.2f), textShader);
 			tank.fire();
-
+			
 		}
 
 		if (CheckCollision(cube, tank)) {
@@ -340,9 +360,17 @@ int main(void) {
 		textShader.use();
 		texto.LoadText("hola", 48);
 		textShader.setMat4("projection", textProj);
-		texto.RenderText("Hola Jorge", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f), textShader);
-		texto.RenderText("Esto tiene lag", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f), textShader);
-
+		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+			//cout << "Antes" << tecla << endl;
+			tecla = "O";
+			Mensajito.replace(16, 9, tecla);
+			//cout << tecla << endl;
+			//cout << Mensajito << endl;
+		}
+		texto.RenderText(titulo, 270.0f, 570.0f, 0.5f, glm::vec3(0, 0, 0), textShader);
+		texto.RenderText(Mensajito, 25.0f, 25.0f, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), textShader);
+		texto.RenderText("Esto tiene lag jeje", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f), textShader);
+		
 
 		/* Intercambio entre buffers */
 		glfwSwapBuffers(window);
