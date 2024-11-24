@@ -15,7 +15,7 @@ Tank::Tank(unsigned int metalG, unsigned int blocks, unsigned int metal)
 	top->Load();
 
 	glm::vec3 canonPos = top->position + glm::vec3(0.0f, 0.5f, 1.0f);
-	canon = new Cylinder(0.25f, 2.0f, 64);
+	canon = new Cylinder(0.25f, 0.25f, 2.0f);
 	canon->SetPosition(canonPos);
 	canon->Load();
 
@@ -42,14 +42,14 @@ Tank::Tank(unsigned int metalG, unsigned int blocks, unsigned int metal)
 			break;
 		}
 
-		wheels[i] = new Cylinder(0.52, 4, 18);
+		wheels[i] = new Cylinder(0.52, 0.52, 4);
 		wheels[i]->SetPosition(wheelPos);
 		wheels[i]->SetRotation(glm::vec3(0.0, glm::radians(90.0), 0.0));
 
 		wheels[i]->Load();
 
 		float centerHeight = wheels[i]->height/2;
-		float faceRadius = wheels[i]->radius/2;
+		float faceRadius = wheels[i]->baseRadius/2;
 
 		for (int j = boltsCount*i; j < boltsCount*(i + 1); j++) {
 			glm::vec3 boltPos = wheels[i]->position;

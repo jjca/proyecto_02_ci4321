@@ -121,7 +121,7 @@ unsigned int LoadTexture(std::string path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Cargamos la imagen, creamos la textura y generamos los mipmaps
@@ -148,7 +148,7 @@ void LoadTextures()
 	textures["metalgreen"] = LoadTexture("resources/textures/metal_green.png");
 	textures["block"] = LoadTexture("resources/textures/blocks.png");
 	textures["metal"] = LoadTexture("resources/textures/metal.png");
-	textures["ground"] = LoadTexture("resources/textures/Grass.png");
+	textures["ground"] = LoadTexture("resources/textures/PTile.png");
 
 }
 
