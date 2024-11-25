@@ -1,10 +1,12 @@
 #include "Tank.h"
 
-Tank::Tank(unsigned int metalG, unsigned int blocks, unsigned int metal)
+Tank::Tank(unsigned int metalG, unsigned int blocks, unsigned int metal, unsigned int metalNorm, unsigned int blocksNorm)
 {
 	this->metalG = metalG;
 	this->blocks = blocks;
 	this->metal = metal;
+	this->metalNorm = metalNorm;
+	this->blocksNorm = blocksNorm;
 
 	body = new Cube(4.0, 1.0, 4.25);
 	body->Load();
@@ -74,23 +76,23 @@ Tank::Tank(unsigned int metalG, unsigned int blocks, unsigned int metal)
 
 void Tank::Draw(const Shader& shader)
 {
-	canon->Bind(metal);
+	canon->Bind(metal, metalNorm);
 	canon->DrawCanon(shader);
 
-	body->Bind(metalG);
+	body->Bind(metalG, metalNorm);
 	body->Draw(shader);
 
-	top->Bind(metalG);
+	top->Bind(metalG, metalNorm);
 	top->Draw(shader);
 
 	for (int i = 0; i < wheelsCount; i++) {
-		wheels[i]->Bind(blocks);
+		wheels[i]->Bind(blocks,blocksNorm);
 		wheels[i]->Draw(shader);
 	}
 
 
 	for (int j = 0; j < boltsCount*wheelsCount; j++) {
-		bolts[j]->Bind(metal);
+		bolts[j]->Bind(metal, metalNorm);
 		bolts[j]->Draw(shader);
 	}
 
@@ -143,7 +145,7 @@ void Tank::moveForward(const Shader& ourShader) {
 	top->moveForward();
 	for (int i = 0; i < wheelsCount; ++i) {
 		wheels[i]->moveForward();
-		wheels[i]->rotation -= glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+		wheels[i]->rotation += glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
 
 	}
 	for (int i = 0; i < boltsCount*wheelsCount; i++) {
@@ -160,7 +162,7 @@ void Tank::moveBackwards(const Shader& ourShader) {
 	top->moveBackwards();
 	for (int i = 0; i < wheelsCount; ++i) {
 		wheels[i]->moveBackwards();
-		wheels[i]->rotation += glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
+		wheels[i]->rotation -= glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)) * 0.05f;
 	}
 	for (int i = 0; i < boltsCount * wheelsCount; i++) {
 		bolts[i]->moveBackwards();

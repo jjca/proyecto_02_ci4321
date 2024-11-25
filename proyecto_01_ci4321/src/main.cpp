@@ -27,6 +27,8 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 // vector del eje derech
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+// Posicion de la luz
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 bool firstMouse = true;
 float yaw = -90.0f;
@@ -150,6 +152,9 @@ void LoadTextures()
 	textures["metal"] = LoadTexture("resources/textures/metal.png");
 	textures["ground"] = LoadTexture("resources/textures/PTile.png");
 
+	textures["metal_normal"] = LoadTexture("resources/textures/metal_normal.png");
+	textures["block_normal"] = LoadTexture("resources/textures/blocks_normal.png");
+
 }
 
 int main(void) {
@@ -187,9 +192,14 @@ int main(void) {
 
 	LoadTextures();
 
+	Shader lightShader("src/Shaders/LightVertexShader.vs", "src/Shaders/LightFragmentShader.fs");
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
-	Tank tank(textures["metalgreen"], textures["block"], textures["metal"]);
+	Sphere lightSource = Sphere(0.2f);
+	lightSource.SetPosition(lightPos);
+	lightSource.Load();
+
+	Tank tank(textures["metalgreen"], textures["block"], textures["metal"], textures["metal_normal"], textures["block_normal"]);
 	Cube cube = Cube(2.0f, 2.0f, 2.0f);
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
 	cube.Load();
@@ -220,13 +230,16 @@ int main(void) {
 
 	// Configuracion del shader
 	shader.use();
-	shader.setInt("texture1", 0);
+	shader.setInt("material.diffuse", 0);
 
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 	shader.setMat4("projection", projection);
 
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
+
+	lightShader.use();
+	lightShader.setMat4("projection", projection);
 	
 	cout << textures["ground"] << endl;
 
@@ -254,8 +267,12 @@ int main(void) {
 
 
 		shader.use();
-		shader.setMat4("view", view);
 
+		shader.setVec3("light.position", lightSource.position);
+		shader.setVec3("light.ambient", 0.6f, 0.6f, 0.6f);
+		shader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+
+		shader.setMat4("view", view);
 
 		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 			tank.moveCanonUp(deltaTime);
@@ -316,13 +333,18 @@ int main(void) {
 			}
 		}
 
-		floor.Bind(textures["ground"]);
+		floor.Bind(textures["ground"], textures["metal_normal"]);
 		floor.Draw(shader);
 
-		sphere2.Bind(textures["metal"]);
+		sphere2.Bind(textures["metal"], textures["metal_normal"]);
 		sphere2.Draw(shader);
 
 		tank.Draw(shader);
+
+		lightShader.use();
+		lightShader.setMat4("view", view);
+		lightSource.Draw(lightShader);
+
 		skybox.Draw(skyboxShader,cameraPos,cameraFront,cameraUp,projection);
 
 		glBindVertexArray(0);

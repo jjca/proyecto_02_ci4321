@@ -140,10 +140,13 @@ void Sphere::Draw(const Shader& shader)
 
 }
 
-void Sphere::Bind(unsigned int textureID)
+void Sphere::Bind(unsigned int textureID, unsigned int normalID)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, normalID);
 
 }
 
@@ -214,63 +217,63 @@ Cube::Cube(float width, float height, float depth)
     attributes = {
         // Cara trasera
         // Triangulo inferior
-        -w, -h, -d,  0.0f, 0.0f,
-         w, -h, -d,  1.0f, 0.0f,
-         w,  h, -d,  1.0f, 1.0f,
+        -w, -h, -d,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+         w, -h, -d,  0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+         w,  h, -d,  0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
         //Triangulo superior
-         w,  h, -d,  1.0f, 1.0f,
-        -w,  h, -d,  0.0f, 1.0f,
-        -w, -h, -d,  0.0f, 0.0f,
+         w,  h, -d,  0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+        -w,  h, -d,  0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+        -w, -h, -d,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
 
         // Cara frontal
         // Triangulo inferior
-        -w, -h,  d,  0.0f, 0.0f,
-         w, -h,  d,  1.0f, 0.0f,
-         w,  h,  d,  1.0f, 1.0f,
+        -w, -h,  d,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+         w, -h,  d,  0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+         w,  h,  d,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
         // Triangulo superior
-         w,  h,  d,  1.0f, 1.0f,
-        -w,  h,  d,  0.0f, 1.0f,
-        -w, -h,  d,  0.0f, 0.0f,
+         w,  h,  d,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+        -w,  h,  d,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+        -w, -h,  d,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
         // Cara lateral izquierda
         // Triangulo superior
-        -w,  h,  d,  1.0f, 0.0f,
-        -w,  h, -d,  1.0f, 1.0f,
-        -w, -h, -d,  0.0f, 1.0f,
+        -w,  h,  d,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -w,  h, -d,  -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        -w, -h, -d,  -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         // Triangulo inferior
-        -w, -h, -d,  0.0f, 1.0f,
-        -w, -h,  d,  0.0f, 0.0f,
-        -w,  h,  d,  1.0f, 0.0f,
+        -w, -h, -d,  -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -w, -h,  d,  -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -w,  h,  d,  -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 
         // Cara lateral derecha
         // Triangulo superior
-         w,  h,  d,  1.0f, 0.0f,
-         w,  h, -d,  1.0f, 1.0f,
-         w, -h, -d,  0.0f, 1.0f,
+         w,  h,  d,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+         w,  h, -d,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+         w, -h, -d,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
         // Triangulo inferior
-         w, -h, -d,  0.0f, 1.0f,
-         w, -h,  d,  0.0f, 0.0f,
-         w,  h,  d,  1.0f, 0.0f,
+         w, -h, -d,  1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+         w, -h,  d,  1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         w,  h,  d,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 
         // Cara inferior
         // Triangulo superior
-        -w, -h, -d,  0.0f, 1.0f,
-         w, -h, -d,  1.0f, 1.0f,
-         w, -h,  d,  1.0f, 0.0f,
+        -w, -h, -d,  0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+         w, -h, -d,  0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+         w, -h,  d,  0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         // Triangulo inferior
-         w, -h,  d,  1.0f, 0.0f,
-        -w, -h,  d,  0.0f, 0.0f,
-        -w, -h, -d,  0.0f, 1.0f,
+         w, -h,  d,  0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -w, -h,  d,  0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -w, -h, -d,  0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
 
         // Cara superior
         // Triangulo superior
-        -w,  h, -d,  0.0f, 1.0f,
-         w,  h, -d,  1.0f, 1.0f,
-         w,  h,  d,  1.0f, 0.0f,
+        -w,  h, -d,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+         w,  h, -d,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+         w,  h,  d,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         // Triangulo inferior
-         w,  h,  d,  1.0f, 0.0f,
-        -w,  h,  d,  0.0f, 0.0f,
-        -w,  h, -d,  0.0f, 1.0f
+         w,  h,  d,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        -w,  h,  d,  0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+        -w,  h, -d,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f
     };
 
 };
@@ -298,10 +301,13 @@ void Cube::Draw(const Shader& shader)
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
 }
-void Cube::Bind(unsigned int textureID)
+void Cube::Bind(unsigned int textureID, unsigned int normalID )
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, normalID);
 
 }
 
@@ -317,12 +323,16 @@ void Cube::Load()
     glBufferData(GL_ARRAY_BUFFER, (unsigned int)attributes.size() * sizeof(float), attributes.data(), GL_STATIC_DRAW);
 
     // Atributos de posicion
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Atributos de coordenadas de texturas
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    // Atributos de coordenadas de normales
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
+
+    // Atributos de coordenadas de texturas
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6));
+    glEnableVertexAttribArray(2);
 
     // Unbind de los buffers para limpiar futuras figuras
     glBindVertexArray(0);
@@ -355,7 +365,7 @@ void Cube::moveLeft() {
     position -= translation;
 }
 
-void Cubemap::Bind(unsigned int textureID)
+void Cubemap::Bind(unsigned int textureID, unsigned int normalID)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -566,10 +576,13 @@ void Cylinder::Draw(const Shader& shader)
 
 }
 
-void Cylinder::Bind(unsigned int textureID)
+void Cylinder::Bind(unsigned int textureID, unsigned int normalID)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, normalID);
 
 }
 

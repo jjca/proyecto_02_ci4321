@@ -53,5 +53,7 @@
     <None Include="src\Shaders\FragmentShader.fs" />
     <None Include="src\Shaders\SkyboxVertexShader.vs" />
     <None Include="src\Shaders\SkyboxFragmentShader.fs" />
+    <None Include="src\Shaders\LightVertexShader.vs" />
+    <None Include="src\Shaders\LightFragmentShader.fs" />
   </ItemGroup>
 </Project>
