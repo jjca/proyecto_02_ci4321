@@ -150,10 +150,11 @@ void LoadTextures()
 	textures["metalgreen"] = LoadTexture("resources/textures/metal_green.png");
 	textures["block"] = LoadTexture("resources/textures/blocks.png");
 	textures["metal"] = LoadTexture("resources/textures/metal.png");
-	textures["ground"] = LoadTexture("resources/textures/PTile.png");
+	textures["ground"] = LoadTexture("resources/textures/SFloor.jpg");
 
 	textures["metal_normal"] = LoadTexture("resources/textures/metal_normal.png");
 	textures["block_normal"] = LoadTexture("resources/textures/blocks_normal.png");
+	textures["ground_normal"] = LoadTexture("resources/textures/SFloor_normal.jpg");
 
 }
 
@@ -240,8 +241,6 @@ int main(void) {
 
 	lightShader.use();
 	lightShader.setMat4("projection", projection);
-	
-	cout << textures["ground"] << endl;
 
 	/* Ciclo hasta que el usuario cierre la ventana */
 	while (!glfwWindowShouldClose(window))
@@ -333,7 +332,7 @@ int main(void) {
 			}
 		}
 
-		floor.Bind(textures["ground"], textures["metal_normal"]);
+		floor.Bind(textures["ground"], textures["ground_normal"]);
 		floor.Draw(shader);
 
 		sphere2.Bind(textures["metal"], textures["metal_normal"]);

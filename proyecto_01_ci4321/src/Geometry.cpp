@@ -78,6 +78,18 @@ Sphere::Sphere(float radius, int sectorCount, int stackCount, bool full)
 
             attributes.push_back(s);
             attributes.push_back(t);
+
+			//// Calcular tangente y bitangente (REVISAR!)
+   //         glm::vec3 tangent = glm::normalize(glm::vec3(-y, x, 0.0f));
+   //         glm::vec3 bitangent = glm::normalize(glm::cross(glm::vec3(nx, ny, nz), tangent));
+
+   //         attributes.push_back(tangent.x);
+   //         attributes.push_back(tangent.y);
+   //         attributes.push_back(tangent.z);
+
+   //         attributes.push_back(bitangent.x);
+   //         attributes.push_back(bitangent.y);
+   //         attributes.push_back(bitangent.z);
         }
     }
 
