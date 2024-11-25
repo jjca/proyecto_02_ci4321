@@ -51,6 +51,7 @@ void Skybox::LoadTexture(vector<std::string> faces)
 
 void Skybox::Draw(Shader& shader, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, glm::mat4 projection)
 {
+	box->SetRotation(box->rotation+glm::vec3(0.0,10.0,0.0));	
 
 	glDepthFunc(GL_LEQUAL);
 	shader.use();
