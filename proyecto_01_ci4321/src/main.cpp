@@ -245,9 +245,6 @@ int main(void) {
 			x = -20 + (i - 10) * 10;
 		}
 
-		cout << i << endl;
-		cout << x << endl;
-		cout << z << endl;
 		floor[i] = Cube(10.0, 0.1, 10.0);
 		floor[i].SetPosition(glm::vec3(x, -1.6f, z));
 		floor[i].Load();
