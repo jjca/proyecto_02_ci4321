@@ -15,7 +15,7 @@ public:
 private:
 	Cubemap* box;
 	unsigned int textureID;
-
+	float rotationAngle = 0.0f;
 	void LoadTexture(vector<std::string> faces);
 };
 
