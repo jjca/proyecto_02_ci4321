@@ -244,7 +244,7 @@ int main(void) {
 	string titulo = "Camionetica poderosa";
 	string mensaje1 = "Moviendo hacia ";
 	string Mensajito = mensaje1.append(tecla);
-
+		
 	/* Ciclo hasta que el usuario cierre la ventana */
 	while (!glfwWindowShouldClose(window))
 	{
@@ -256,7 +256,7 @@ int main(void) {
 		// input
 		processInput(window);
 
-
+		
 		/* Limpieza del buffer y el buffer de profundidad */
 		glClearColor(0.761f, 1.0f, 0.992f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -267,7 +267,7 @@ int main(void) {
 			cameraUp
 		);
 
-		
+
 		shader.use();
 		shader.setMat4("view", view);
 
