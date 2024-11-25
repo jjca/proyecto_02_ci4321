@@ -231,9 +231,32 @@ int main(void) {
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
 	cube.Load();
 
-	Cube floor = Cube(100.0f, 0.1f, 100.0f);
-	floor.SetPosition(glm::vec3(0.0f, -1.6f, 0.0f));
-	floor.Load();
+
+	Cube floor[15];
+
+	for (int i = 0; i < 15; i++) {
+
+		float z = -10;
+		float x = -20 + i * 10;
+
+		if (i > 4)
+		{
+			z = 0;
+			x = -20 + (i - 5) * 10;
+		}
+		if (i > 9) {
+			z = 10;
+			x = -20 + (i - 10) * 10;
+		}
+
+		cout << i << endl;
+		cout << x << endl;
+		cout << z << endl;
+		floor[i] = Cube(10.0, 0.1, 10.0);
+		floor[i].SetPosition(glm::vec3(x, -1.6f, z));
+		floor[i].Load();
+	}
+
 
 	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
 	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
@@ -377,8 +400,13 @@ int main(void) {
 			}
 		}
 
-		floor.Bind(textures["ground"], textures["ground_normal"]);
-		floor.Draw(shader);
+
+		for (int i = 0; i < 10; i++) {
+
+			floor[i].Bind(textures["ground"], textures["ground_normal"]);
+			floor[i].Draw(shader);
+
+		}
 
 		sphere2.Bind(textures["metal"], textures["metal_normal"]);
 		sphere2.Draw(shader);
