@@ -22,7 +22,7 @@ public:
 	virtual void Load() = 0;
 	virtual void Clean() = 0;
 	virtual void Draw(const Shader& shader) = 0;
-	virtual void Bind(unsigned int textureID) = 0;
+	virtual void Bind(unsigned int textureID, unsigned int normalID) = 0;
 
 	inline void SetPosition(glm::vec3 newPos) 
 	{
@@ -71,7 +71,7 @@ public:
 	void Load() override;
 	void Clean() override;
 	void Draw(const Shader& shader) override;
-	void Bind(unsigned int textureID) override;
+	void Bind(unsigned int textureID, unsigned int normalID) override;
 	void moveForward();
 	void moveBackwards();
 };
@@ -89,7 +89,7 @@ public:
 	void Load() override;
 	void Clean() override;
 	void Draw(const Shader& shader) override;
-	void Bind(unsigned int textureID) override;
+	void Bind(unsigned int textureID, unsigned int normalID) override;
 	void moveForward();
 	void moveBackwards();
 	void moveRight();
@@ -102,7 +102,7 @@ public:
 
 	Cubemap(float width = 1.0, float height = 1.0, float depth = 1.0) :Cube(width, height, depth) {}
 
-	void Bind(unsigned int textureID) override;
+	void Bind(unsigned int textureID, unsigned int normalID) override;
 
 };
 
@@ -114,21 +114,29 @@ public:
 	std::vector<float> unitCircleVertices;
 	std::vector<unsigned int> indices;
 	
-	float radius;
+	float baseRadius;
+	float topRadius;
 	float height;
-	float sectorCount;	
+	int sectorCount;	
+	int stackCount;
 
 
-	Cylinder(float radius = 1.0, float height = 1.0, int sectorCount = 36);
+	Cylinder(float baseRadius = 1.0, float topRadius = 1.0, float height = 1.0, int sectorCount = 36, int stackCount = 2);
 
 	void Load() override;
 	void Clean() override;
 	void Draw(const Shader& shader) override;
 	void DrawCanon(const Shader& shader);
 	void DrawProjectile(const Shader& shader, glm::vec3 canonPosition);
-	void Bind(unsigned int textureID) override;
+	void Bind(unsigned int textureID, unsigned int normalID) override;
 	void moveForward();
 	void moveBackwards();
+
+private:
+
+	void CalculateUnitCircleVertices();
+	std::vector<float> CalculateSideNormals();
+	void CalculateIndices(int baseCenterIndex, int topCenterIndex);
 };
 
 

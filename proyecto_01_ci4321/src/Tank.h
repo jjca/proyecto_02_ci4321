@@ -11,7 +11,7 @@ class Tank
 {
 public:
 
-	Tank(unsigned int metalG, unsigned int blocks, unsigned int metal);
+	Tank(unsigned int metalG, unsigned int blocks, unsigned int metal, unsigned int metalNorm, unsigned int blocksNorm);
 	void Draw(const Shader& shader);
 	void Clear();
 	void moveForward(const Shader& ourShader);
@@ -19,6 +19,8 @@ public:
 	unsigned int metalG;
 	unsigned int blocks;
 	unsigned int metal;
+	unsigned int metalNorm;
+	unsigned int blocksNorm;
 	void moveCanonUp(float deltaTime);
 	void moveCanonDown(float deltaTime);
 	void moveCanonRight(float deltaTime);

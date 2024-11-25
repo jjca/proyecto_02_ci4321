@@ -15,6 +15,7 @@
 #include "Geometry.h"
 #include "Tank.h"
 #include "Skybox.h"
+#include "IceCream.h"
 #include "Text.h"
 
 using namespace std;
@@ -29,6 +30,8 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 // vector del eje derech
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+// Posicion de la luz
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 bool firstMouse = true;
 float yaw = -90.0f;
@@ -123,7 +126,7 @@ unsigned int LoadTexture(std::string path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Steamos parametros de filtro en la textura
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Cargamos la imagen, creamos la textura y generamos los mipmaps
@@ -150,9 +153,33 @@ void LoadTextures()
 	textures["metalgreen"] = LoadTexture("resources/textures/metal_green.png");
 	textures["block"] = LoadTexture("resources/textures/blocks.png");
 	textures["metal"] = LoadTexture("resources/textures/metal.png");
-	textures["ground"] = LoadTexture("resources/textures/Grass.png");
+	textures["ground"] = LoadTexture("resources/textures/SFloor.jpg");
+	textures["choco"] = LoadTexture("resources/textures/choco.jpg");
+	textures["strawberry"] = LoadTexture("resources/textures/strawberry.jpg");
+	textures["vanilla"] = LoadTexture("resources/textures/vanilla.jpg");
+	textures["cone"] = LoadTexture("resources/textures/cone.jpg");
+	textures["cherry"] = LoadTexture("resources/textures/cherry.jpg");
+
+	textures["metal_normal"] = LoadTexture("resources/textures/metal_normal.png");
+	textures["block_normal"] = LoadTexture("resources/textures/blocks_normal.jpg");
+	textures["ground_normal"] = LoadTexture("resources/textures/SFloor_normal.jpg");
+	textures["flavor_normal"] = LoadTexture("resources/textures/choco_normal.png");
+	textures["cone_normal"] = LoadTexture("resources/textures/cone_normal.png");
+	textures["cherry_normal"] = LoadTexture("resources/textures/cherry_normal.png");
 
 }
+
+void moveLight(Sphere* light) {
+
+	glm::vec3 pos;
+
+	pos.x = 1.0f + sin(glfwGetTime()) * 5.0f;
+	pos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+	pos.z = cos(glfwGetTime()) * 5.0f;
+
+	light->SetPosition(pos);
+}
+
 
 int main(void) {
 
@@ -191,10 +218,15 @@ int main(void) {
 
 	LoadTextures();
 
-	// Main shader
+	Shader lightShader("src/Shaders/LightVertexShader.vs", "src/Shaders/LightFragmentShader.fs");
 	Shader shader("src/Shaders/VertexShader.vs", "src/Shaders/FragmentShader.fs");
 
-	Tank tank(textures["metalgreen"], textures["block"], textures["metal"]);
+	Sphere lightSource = Sphere(0.4f);
+	lightSource.SetPosition(lightPos);
+	lightSource.Load();
+
+	Tank tank(textures["metalgreen"], textures["block"], textures["metal"], textures["metal_normal"], textures["block_normal"]);
+
 	Cube cube = Cube(2.0f, 2.0f, 2.0f);
 	cube.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
 	cube.Load();
@@ -206,6 +238,9 @@ int main(void) {
 	Sphere sphere2 = Sphere(1.0f, 36, 18, true);
 	sphere2.SetPosition(glm::vec3(3.0f, 0.0f, 15.0f));
 	sphere2.Load();
+
+	IceCream iceCream(textures["choco"], textures["strawberry"], textures["vanilla"], textures["cherry"], textures["cone"], textures["flavor_normal"], 
+		textures["cone_normal"], textures["cherry_normal"]);
 
 	// Skybox area
 	Shader skyboxShader("src/Shaders/SkyboxVertexShader.vs", "src/Shaders/SkyboxFragmentShader.fs");
@@ -225,15 +260,16 @@ int main(void) {
 
 	// Configuracion del shader
 	shader.use();
-	shader.setInt("texture1", 0);
+	shader.setInt("material.diffuse", 0);
 
 	glm::mat4 projection = glm::perspective(glm::radians(fov), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 	shader.setMat4("projection", projection);
 
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
-	
-	cout << textures["ground"] << endl;
+
+	lightShader.use();
+	lightShader.setMat4("projection", projection);
 
 	/* Text area*/
 	glm::mat4 textProj = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
@@ -269,8 +305,12 @@ int main(void) {
 
 
 		shader.use();
-		shader.setMat4("view", view);
 
+		shader.setVec3("light.position", lightSource.position);
+		shader.setVec3("light.ambient", 0.6f, 0.6f, 0.6f);
+		shader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+
+		shader.setMat4("view", view);
 
 		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 			tank.moveCanonUp(deltaTime);
@@ -346,13 +386,21 @@ int main(void) {
 			}
 		}
 
-		floor.Bind(textures["ground"]);
+		floor.Bind(textures["ground"], textures["ground_normal"]);
 		floor.Draw(shader);
 
-		sphere2.Bind(textures["metal"]);
+		sphere2.Bind(textures["metal"], textures["metal_normal"]);
 		sphere2.Draw(shader);
 
 		tank.Draw(shader);
+
+		iceCream.Draw(shader);
+
+		lightShader.use();
+		moveLight(&lightSource);
+		lightShader.setMat4("view", view);
+		lightSource.Draw(lightShader);
+
 		skybox.Draw(skyboxShader,cameraPos,cameraFront,cameraUp,projection);
 
 		glBindVertexArray(0);

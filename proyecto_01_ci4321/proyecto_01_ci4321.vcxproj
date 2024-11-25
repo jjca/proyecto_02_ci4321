@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Geometry.cpp" />
+    <ClCompile Include="src\IceCream.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Shader.h" />
     <ClCompile Include="src\Skybox.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="src\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\IceCream.h" />
     <ClInclude Include="src\Skybox.h" />
     <ClInclude Include="src\Geometry.h" />
     <ClInclude Include="src\stb_image\stb_image.h" />
@@ -152,6 +154,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Shaders\FragmentShader.fs" />
+    <None Include="src\Shaders\LightFragmentShader.fs" />
+    <None Include="src\Shaders\LightVertexShader.vs" />
     <None Include="src\Shaders\SkyboxFragmentShader.fs" />
     <None Include="src\Shaders\SkyboxVertexShader.vs" />
     <None Include="src\Shaders\text.fs" />
