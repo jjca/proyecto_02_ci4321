@@ -329,25 +329,16 @@ int main(void) {
 			tank.moveCanonLeft(deltaTime);
 		}
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-			cout << "Antes" << tecla << endl;
 			//tecla.replace(0, 8, "adelante");
 			tecla = "adelante";
 			Mensajito.replace(16, 9, tecla);
-			cout << tecla << endl;
-
-			cout << Mensajito << endl;
-			//cube.moveForward(ourShader);
 			tank.moveForward(shader);
 		}
 		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 			//cube.moveForward(ourShader);
-			cout << "Antes" << tecla << endl;
 			//tecla.replace(0, 5, "atras");
 			tecla = "atras";
 			Mensajito.replace(16, 9, tecla);
-			cout << tecla << endl;
-
-			cout << Mensajito << endl;
 			tank.moveBackwards(shader);
 		}
 
